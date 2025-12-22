@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   // ... rest of your API logic
-}
+
 import db from '../../../lib/db';
 
 export default async function handler(req, res) {
@@ -33,4 +33,5 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+}
 }
