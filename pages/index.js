@@ -148,22 +148,38 @@ export default function Home() {
               </button>
             </form>
 
-            <AnimatePresence>
-              {retrievedData && (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
-                  {retrievedData.map((item, idx) => (
-                    <div key={idx} className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-                      <div className="text-center md:text-left">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">{new Date(item.created_at).toDateString()}</span>
-                        <h4 className="text-xl font-black">{item.type}</h4>
-                      </div>
-                      <div className="flex flex-col items-center md:items-end">
-                        <span className="text-xs text-gray-500 font-mono">SERIAL: {item.serial}</span>
-                        <span className="text-2xl font-black font-mono tracking-tighter text-fuchsia-400">{item.pin}</span>
-                      </div>
-                    </div>
-                  ))}
-                </AnimatePresence>
+           <AnimatePresence>
+  {retrievedData && (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="space-y-4"
+    >
+      {retrievedData.map((item, idx) => (
+        <div
+          key={idx}
+          className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4"
+        >
+          <div className="text-center md:text-left">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
+              {new Date(item.created_at).toDateString()}
+            </span>
+            <h4 className="text-xl font-black">{item.type}</h4>
+          </div>
+          <div className="flex flex-col items-center md:items-end">
+            <span className="text-xs text-gray-500 font-mono">
+              SERIAL: {item.serial}
+            </span>
+            <span className="text-2xl font-black font-mono tracking-tighter text-fuchsia-400">
+              {item.pin}
+            </span>
+          </div>
+        </div>
+      ))}
+    </motion.div>   {/* ✅ THIS WAS MISSING */}
+  )}
+</AnimatePresence>
+
           </div>
         </section>
       </div>
