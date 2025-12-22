@@ -10,27 +10,27 @@ import {
 } from 'lucide-react';
 
 export default function Admin() {
-  const sessionContext = useSession(); // Don't destructure yet
+  const sessionContext = useSession();
   const router = useRouter();
 
-  // Add this safety check
+  // 1. Safety checks for build-time
   const session = sessionContext?.data;
   const status = sessionContext?.status;
 
-  const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
-  // ... rest of your states
-  
+  // 2. State definitions (ONLY ONCE)
   const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inputMode, setInputMode] = useState('manual');
   const [type, setType] = useState('WASSCE');
   
-  // File & Manual States
+  // 3. File & Manual States
   const [file, setFile] = useState(null);
   const [manualSerial, setManualSerial] = useState('');
   const [manualPin, setManualPin] = useState('');
   const fileInputRef = useRef(null);
+
+  // ... rest of your useEffects and functions
 
   // Security Redirect: If unauthenticated, send to login page
   useEffect(() => {
