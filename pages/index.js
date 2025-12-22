@@ -36,7 +36,22 @@ export default function Home() {
       toast.dismiss(t);
     }
   };
+ // Add this inside your Home component before the return
+const handleClose = () => {
+  toast.error("Payment Cancelled");
+};
 
+// Update your PaystackButton props inside the return:
+<PaystackButton 
+  className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
+  email={generatedEmail}
+  amount={selectedVoucher.price * quantity * 100}
+  publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+  text="PAY NOW"
+  onSuccess={handleSuccess}
+  onClose={handleClose} // THIS FIXES THE CALLBACK ERROR
+/>  
+    
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
       <Head><title>Waec gh checkers | Bright WAEC Portal</title></Head>
