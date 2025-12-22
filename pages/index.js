@@ -163,7 +163,7 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                </AnimatePresence
+                </AnimatePresence>
           </div>
         </section>
       </div>
