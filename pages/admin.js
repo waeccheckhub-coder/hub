@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, PlusCircle, Database, LogOut, Trash2, FileText, UserPlus, Save, AlertCircle } from 'lucide-react';
+import { 
+  LayoutDashboard, Database, LogOut, Trash2, 
+  UploadCloud, FileSpreadsheet, Fingerprint, Plus, 
+  ShieldCheck, ArrowRight, X 
+} from 'lucide-react';
 
 export default function Admin() {
   const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [inputMode, setInputMode] = useState('manual'); // 'manual' or 'csv'
-  
-  // Form States
+  const [inputMode, setInputMode] = useState('manual');
   const [type, setType] = useState('WASSCE');
-  const [csvData, setCsvData] = useState('');
+  
+  // File & Manual States
+  const [file, setFile] = useState(null);
   const [manualSerial, setManualSerial] = useState('');
   const [manualPin, setManualPin] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -22,216 +27,215 @@ export default function Admin() {
       const res = await axios.get('/api/admin/stats');
       setStats(res.data.stats);
       setVouchers(res.data.recentVouchers);
-    } catch (e) { toast.error("Sync Error: Check database connection."); }
+    } catch (e) { toast.error("Connection Interrupted"); }
   };
 
-  const handleUpload = async (e) => {
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile && selectedFile.type === "text/csv" || selectedFile.name.endsWith('.csv')) {
+      setFile(selectedFile);
+    } else {
+      toast.error("Please upload a valid .csv file");
+    }
+  };
+
+  const processUpload = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    let payload = { type };
-    
+
+    const formData = { type };
+
     if (inputMode === 'manual') {
       if (!manualSerial || !manualPin) {
         setLoading(false);
-        return toast.error("Please enter both Serial and PIN");
+        return toast.error("Incomplete manual entry");
       }
-      payload.csvData = `${manualSerial}, ${manualPin}`;
+      formData.csvData = `${manualSerial}, ${manualPin}`;
+      executeUpload(formData);
     } else {
-      if (!csvData) {
+      if (!file) {
         setLoading(false);
-        return toast.error("Please paste CSV data");
+        return toast.error("No file selected");
       }
-      payload.csvData = csvData;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        formData.csvData = event.target.result;
+        executeUpload(formData);
+      };
+      reader.readAsText(file);
     }
+  };
 
+  const executeUpload = async (payload) => {
     try {
       await axios.post('/api/admin/upload', payload);
-      toast.success(inputMode === 'manual' ? "Voucher saved!" : "Bulk import complete!");
-      setCsvData('');
+      toast.success("Inventory Synchronized");
+      setFile(null);
       setManualSerial('');
       setManualPin('');
       fetchData();
-    } catch (e) { 
-      toast.error(e.response?.data?.error || "Import failed"); 
+    } catch (e) {
+      toast.error("Upload process failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] flex text-slate-800 font-sans">
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-[#fafafa] text-[#1a1a1a] font-sans">
+      <Toaster position="bottom-right" />
       
-      {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-slate-200 p-8 flex flex-col hidden lg:flex shadow-sm">
-        <div className="flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-            <Database size={20}/>
+      {/* Precision Header */}
+      <nav className="h-20 bg-white border-b border-black/[0.08] px-8 flex justify-between items-center sticky top-0 z-50">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+              <Fingerprint size={18} className="text-white" />
+            </div>
+            <span className="font-bold tracking-tighter text-lg uppercase">System Console</span>
           </div>
-          <span className="font-bold tracking-tight text-xl">PORTAL<span className="text-blue-600">HUB</span></span>
+          <div className="h-6 w-[1px] bg-black/10"></div>
+          <div className="flex items-center gap-2 text-[10px] font-bold text-black/40 uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-emerald-500" /> Secure Protocol Active
+          </div>
         </div>
-        
-        <nav className="space-y-1 flex-1">
-          <button className="w-full flex items-center gap-4 px-5 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm border border-blue-100 transition-all">
-            <LayoutDashboard size={18}/> INVENTORY
-          </button>
-        </nav>
-
-        <div className="mt-auto p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
-           <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2 uppercase">System Health</div>
-           <div className="flex items-center gap-2 text-emerald-500 font-bold text-sm">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> DB Online
-           </div>
-        </div>
-
-        <button className="flex items-center gap-4 px-5 py-3 text-slate-400 font-bold text-sm hover:text-red-500 transition-all">
-          <LogOut size={18}/> SIGN OUT
+        <button className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-black/40 hover:text-red-500 transition-colors">
+          Terminate Session <LogOut size={14} />
         </button>
-      </aside>
+      </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 md:p-12 overflow-y-auto">
-        <header className="mb-12">
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Stock Management</h1>
-            <p className="text-slate-500 mt-1">Add, track, and monitor digital vouchers.</p>
-        </header>
-
-        {/* Status Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <main className="max-w-[1600px] mx-auto p-12 grid lg:grid-cols-12 gap-12">
+        
+        {/* Metric Cards */}
+        <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
-            { label: 'Total Stock', val: stats.total, color: 'text-slate-900', border: 'border-slate-200' },
-            { label: 'Available', val: stats.available, color: 'text-blue-600', border: 'border-blue-200 bg-blue-50/30' },
-            { label: 'Sold Units', val: stats.sold, color: 'text-slate-400', border: 'border-slate-100' }
+            { label: 'Total units', val: stats.total, color: 'bg-white text-black' },
+            { label: 'Live Stock', val: stats.available, color: 'bg-black text-white' },
+            { label: 'Units Sold', val: stats.sold, color: 'bg-white text-black' },
+            { label: 'Health', val: '100%', color: 'bg-white text-emerald-600' }
           ].map((s, i) => (
-            <div key={i} className={`bg-white p-8 rounded-3xl border ${s.border} shadow-sm transition-transform hover:scale-[1.02]`}>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{s.label}</p>
-               <h3 className={`text-4xl font-bold ${s.color}`}>{s.val}</h3>
+            <div key={i} className={`p-8 border border-black/[0.05] rounded-sm ${s.color} flex flex-col justify-between h-40`}>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{s.label}</span>
+              <span className="text-4xl font-light tracking-tighter">{s.val}</span>
             </div>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Input Section */}
-          <div className="lg:col-span-5">
-            <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm sticky top-8">
-              <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6">
-                <h2 className="text-xl font-bold">Add Vouchers</h2>
-                <div className="flex bg-slate-100 p-1 rounded-lg">
-                  <button 
-                    onClick={() => setInputMode('manual')}
-                    className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-md transition-all ${inputMode === 'manual' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    Manual
-                  </button>
-                  <button 
-                    onClick={() => setInputMode('csv')}
-                    className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-md transition-all ${inputMode === 'csv' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    Bulk CSV
-                  </button>
-                </div>
+        {/* Input Terminal */}
+        <div className="lg:col-span-4">
+          <div className="bg-white border border-black/10 rounded-sm p-10 sticky top-32">
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] mb-10 border-b border-black/5 pb-4">Inventory Intake</h2>
+            
+            <form onSubmit={processUpload} className="space-y-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-black/40 tracking-widest">Select Category</label>
+                <select 
+                  value={type} onChange={(e) => setType(e.target.value)}
+                  className="w-full bg-transparent border-b-2 border-black/10 py-3 font-bold outline-none focus:border-black transition-all appearance-none cursor-pointer"
+                >
+                  <option value="WASSCE">WASSCE RESULTS</option>
+                  <option value="BECE">BECE RESULTS</option>
+                  <option value="PLACEMENT">PLACEMENT VOUCHER</option>
+                </select>
               </div>
 
-              <form onSubmit={handleUpload} className="space-y-6">
-                <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase mb-3 block">Category</label>
-                  <select 
-                    value={type} onChange={(e)=>setType(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 ring-blue-500/10 focus:border-blue-500"
-                  >
-                    <option value="WASSCE">WASSCE Results</option>
-                    <option value="BECE">BECE Results</option>
-                    <option value="PLACEMENT">Placement Voucher</option>
-                  </select>
-                </div>
-
-                {inputMode === 'manual' ? (
-                  <div className="space-y-4 animate-in fade-in duration-300">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <label className="text-xs font-bold text-slate-400 mb-2 block uppercase">Serial Number</label>
-                        <input 
-                          type="text" value={manualSerial} onChange={(e)=>setManualSerial(e.target.value)}
-                          placeholder="e.g., WAEC-12345"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-400 mb-2 block uppercase">PIN Code</label>
-                        <input 
-                          type="text" value={manualPin} onChange={(e)=>setManualPin(e.target.value)}
-                          placeholder="e.g., 987654321"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono font-bold outline-none focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="animate-in fade-in duration-300">
-                    <label className="text-xs font-bold text-slate-400 mb-2 block uppercase">Paste CSV Data (Serial, Pin)</label>
-                    <textarea 
-                      rows="8" value={csvData} onChange={(e)=>setCsvData(e.target.value)}
-                      placeholder="SERIAL123, PIN456&#10;SERIAL789, PIN012"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 font-mono text-xs outline-none focus:border-blue-500"
-                    ></textarea>
-                    <div className="flex items-start gap-2 mt-3 p-3 bg-blue-50 rounded-xl text-blue-600 text-[10px] font-bold">
-                       <AlertCircle size={14}/> <span>Ensure format is: Serial, PIN (one pair per line)</span>
-                    </div>
-                  </div>
-                )}
-
+              <div className="flex gap-4 p-1 bg-[#f0f0f0] rounded-sm">
                 <button 
-                  disabled={loading}
-                  className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-100 flex items-center justify-center gap-2 active:scale-95"
+                  type="button" onClick={() => setInputMode('manual')}
+                  className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${inputMode === 'manual' ? 'bg-white shadow-sm' : 'opacity-40'}`}
                 >
-                  {loading ? 'Processing...' : (inputMode === 'manual' ? <Save size={18}/> : <FileText size={18}/>)}
-                  {loading ? '' : (inputMode === 'manual' ? 'Save Voucher' : 'Import Batch')}
+                  Manual Entry
                 </button>
-              </form>
-            </div>
-          </div>
+                <button 
+                  type="button" onClick={() => setInputMode('csv')}
+                  className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${inputMode === 'csv' ? 'bg-white shadow-sm' : 'opacity-40'}`}
+                >
+                  File Upload
+                </button>
+              </div>
 
-          {/* Activity Table */}
-          <div className="lg:col-span-7">
-            <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-               <div className="p-8 border-b border-slate-50 flex justify-between items-center">
-                  <h2 className="text-xl font-bold">Latest Entries</h2>
-                  <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">Real-time</span>
-               </div>
-               <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                      <tr>
-                        <th className="px-8 py-5">Product</th>
-                        <th className="px-8 py-5">Serial</th>
-                        <th className="px-8 py-5">Status</th>
-                        <th className="px-8 py-5 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {vouchers.map((v, i) => (
-                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-8 py-5">
-                            <span className="font-bold text-slate-900 text-sm">{v.type}</span>
-                          </td>
-                          <td className="px-8 py-5 font-mono text-xs text-slate-400 tracking-tighter uppercase">{v.serial}</td>
-                          <td className="px-8 py-5">
-                            <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${v.status === 'sold' ? 'bg-pink-50 text-pink-600 border border-pink-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
-                              {v.status}
-                            </span>
-                          </td>
-                          <td className="px-8 py-5 text-right">
-                            <button className="p-2 text-slate-200 hover:text-red-500 transition-colors">
-                                <Trash2 size={16}/>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-               </div>
+              {inputMode === 'manual' ? (
+                <div className="space-y-6">
+                  <input 
+                    type="text" placeholder="SERIAL NUMBER" value={manualSerial}
+                    onChange={(e) => setManualSerial(e.target.value)}
+                    className="w-full bg-[#f9f9f9] border border-black/5 p-4 text-xs font-bold outline-none focus:border-black/20"
+                  />
+                  <input 
+                    type="text" placeholder="PIN CODE" value={manualPin}
+                    onChange={(e) => setManualPin(e.target.value)}
+                    className="w-full bg-[#f9f9f9] border border-black/5 p-4 text-xs font-mono font-bold outline-none focus:border-black/20"
+                  />
+                </div>
+              ) : (
+                <div 
+                  onClick={() => fileInputRef.current.click()}
+                  className={`border-2 border-dashed rounded-sm p-8 text-center cursor-pointer transition-all ${file ? 'border-emerald-500 bg-emerald-50' : 'border-black/10 hover:border-black/30'}`}
+                >
+                  <input type="file" hidden ref={fileInputRef} accept=".csv" onChange={handleFileChange} />
+                  {file ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <FileSpreadsheet className="text-emerald-600" />
+                      <span className="text-[10px] font-black uppercase">{file.name}</span>
+                      <button type="button" onClick={(e) => {e.stopPropagation(); setFile(null)}} className="text-red-500 text-[9px] font-bold">REMOVE</button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 opacity-40">
+                      <UploadCloud size={32} />
+                      <span className="text-[10px] font-black uppercase">Click to Select CSV</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button 
+                disabled={loading}
+                className="w-full bg-black text-white py-5 flex items-center justify-center gap-3 group hover:bg-[#333] transition-all"
+              >
+                <span className="text-xs font-black uppercase tracking-[0.2em]">{loading ? 'Processing...' : 'Sync Inventory'}</span>
+                {!loading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Audit Log Table */}
+        <div className="lg:col-span-8">
+          <div className="bg-white border border-black/10 rounded-sm overflow-hidden">
+            <div className="p-8 border-b border-black/5 flex justify-between items-center">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em]">Recent Database Records</h3>
+              <div className="flex gap-2">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              </div>
             </div>
+            <table className="w-full text-left">
+              <thead className="bg-[#fcfcfc] border-b border-black/5 text-[9px] font-black uppercase tracking-widest text-black/40">
+                <tr>
+                  <th className="px-8 py-6">Identity</th>
+                  <th className="px-8 py-6">Serial Ref</th>
+                  <th className="px-8 py-6">Status</th>
+                  <th className="px-8 py-6 text-right">Removal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-black/5">
+                {vouchers.map((v, i) => (
+                  <tr key={i} className="hover:bg-[#f9f9f9] transition-colors group">
+                    <td className="px-8 py-5 text-[11px] font-black">{v.type}</td>
+                    <td className="px-8 py-5 text-[11px] font-mono opacity-50">{v.serial}</td>
+                    <td className="px-8 py-5">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 border ${v.status === 'sold' ? 'border-red-200 text-red-500' : 'border-emerald-200 text-emerald-500'}`}>
+                        {v.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                      <button className="text-black/10 hover:text-red-500 transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
