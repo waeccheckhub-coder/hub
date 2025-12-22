@@ -41,17 +41,9 @@ const handleClose = () => {
   toast.error("Payment Cancelled");
 };
 
-// Update your PaystackButton props inside the return:
-<PaystackButton 
-  className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
-  email={generatedEmail}
-  amount={(selectedVoucher?.price || 0) * quantity * 100}
-  publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-  text="PAY NOW"
-  onSuccess={handleSuccess}
-  onClose={handleClose} // THIS FIXES THE CALLBACK ERROR
-/>  
-    
+const handleClose = () => {
+  toast.error("Transaction cancelled.");
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
       <Head><title>Waec gh checkers | Bright WAEC Portal</title></Head>
@@ -172,13 +164,15 @@ const handleClose = () => {
                 />
                 {phone.length >= 10 ? (
                   <PaystackButton 
-                    className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
-                    email={generatedEmail}
-                    amount={(selectedVoucher?.price || 0) * quantity * 100}
-                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text="PAY NOW"
-                    onSuccess={handleSuccess}
-                  />
+  className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
+  email={generatedEmail}
+  // Use optional chaining to prevent the "null" error we discussed
+  amount={(selectedVoucher?.price || 0) * quantity * 100}
+  publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+  text="PAY NOW"
+  onSuccess={handleSuccess}
+  onClose={handleClose} // THIS IS THE CRITICAL FIX
+/>
                 ) : (
                   <button disabled className="bg-slate-100 text-slate-300 font-black px-12 py-4 rounded-2xl cursor-not-allowed uppercase tracking-tighter">Enter Phone</button>
                 )}
