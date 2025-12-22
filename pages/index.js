@@ -10,11 +10,11 @@ export default function Home() {
   const [hasMounted, setHasMounted] = useState(false);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
-  const [quantities, setQuantities] = useState({ WASSCE: 1, BECE: 1 });
+  const [quantities, setQuantities] = useState({ WASSCE: 1, BECE: 1, CSSPS: 1 });
   const [retrieveInput, setRetrieveInput] = useState('');
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [stock, setStock] = useState({ WASSCE: 100, BECE: 100 });
+  const [stock, setStock] = useState({ WASSCE: 100, BECE: 100, CSSPS: 100 });
 
   useEffect(() => {
     setHasMounted(true);
@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="min-h-screen aura-bg text-[#1e293b] font-outfit selection:bg-[#4f46e5] selection:text-white">
       <Head>
-        <title>WAEC GH CHECKERS | The hub for all your results vouchers.</title>
+        <title>waeccardsonline — Instant WASSCE, BECE & CSSPS Delivery</title>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
       </Head>
       <Toaster position="top-center" />
@@ -81,7 +81,7 @@ export default function Home() {
               AC
             </div>
             <div>
-              <div className="font-extrabold text-[17px]">WAEC GH CHECKERS</div>
+              <div className="font-extrabold text-[17px]">Waec Gh Cards Online</div>
               <div className="text-sm text-[#64748b]">Instant voucher delivery</div>
             </div>
           </div>
@@ -98,24 +98,26 @@ export default function Home() {
         <section className="grid md:grid-cols-[1fr_420px] gap-8 items-start mb-10" id="buynow">
           <div className="pt-5">
             <h1 className="font-space text-4xl md:text-[42px] font-bold leading-[1.1] mb-4 tracking-[-1px]">
-              Buy WASSCE & BECE Vouchers <span className="text-[#4f46e5]">Instantly</span>
+              Buy WASSCE, BECE & CSSPS <span className="text-[#4f46e5]">Instantly</span>
             </h1>
-            <p className="text-[#64748b] text-lg mb-6">Secure, fast delivery. Receive your voucher instantly after payment.</p>
-            <button 
-              onClick={() => document.getElementById('wassceForm').scrollIntoView({ behavior: 'smooth' })}
-              className="bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white px-10 py-4 rounded-[14px] font-bold shadow-[0_8px_20px_rgba(79,70,229,0.2)] hover:-translate-y-0.5 transition-all"
-            >
-              Buy Voucher
-            </button>
+            <p className="text-[#64748b] text-lg mb-6">Authentic WAEC result checkers and School Placement vouchers delivered via SMS.</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => document.getElementById('wassceForm').scrollIntoView({ behavior: 'smooth' })}
+                className="bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white px-8 py-4 rounded-[14px] font-bold shadow-[0_8px_20px_rgba(79,70,229,0.2)] hover:-translate-y-0.5 transition-all"
+              >
+                Get Started
+              </button>
+            </div>
             <div className="mt-4 text-[#64748b] font-medium">
               <strong>Price:</strong> GHS 30 per voucher
             </div>
           </div>
 
-          {/* WASSCE Card */}
+          {/* WASSCE / NOVDEC Card */}
           <div className="glass-card p-6 md:p-8" id="wassceForm">
-            <h3 className="text-xl font-bold mb-1">Purchase WASSCE Voucher</h3>
-            <p className="text-sm text-[#64748b] mb-4">Enter your details — we send the voucher by SMS.</p>
+            <h3 className="text-xl font-bold mb-1 text-indigo-700">WASSCE / NOVDEC</h3>
+            <p className="text-sm text-[#64748b] mb-4">Results Checker Voucher — Delivered via SMS.</p>
             
             <div className="space-y-4">
               <div>
@@ -125,7 +127,6 @@ export default function Home() {
               <div>
                 <label className="label">Phone number</label>
                 <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
-                <p className="text-[11px] text-[#64748b] mt-1">Use a Ghanaian number (e.g. 0244123456)</p>
               </div>
               <div>
                 <label className="label">Quantity</label>
@@ -134,7 +135,7 @@ export default function Home() {
                   value={quantities.WASSCE} 
                   onChange={e => setQuantities({...quantities, WASSCE: Number(e.target.value)})}
                 >
-                  {[...Array(30)].map((_, i) => (
+                  {[...Array(10)].map((_, i) => (
                     <option key={i+1} value={i+1}>{i+1}</option>
                   ))}
                 </select>
@@ -156,49 +157,88 @@ export default function Home() {
           </div>
         </section>
 
-        {/* BECE Card */}
-        <section className="glass-card p-8 mb-8" id="beceForm">
-          <h2 className="text-2xl font-bold mb-2">Purchase BECE Voucher</h2>
-          <p className="text-[#64748b] mb-6">Buy BECE checker voucher — delivered instantly via SMS.</p>
-          
-          <div className="grid md:grid-cols-2 gap-6">
+        {/* BECE and CSSPS Grid */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+            {/* BECE Card */}
+            <section className="glass-card p-8" id="beceForm">
+            <h2 className="text-xl font-bold mb-1 text-indigo-700">BECE Voucher</h2>
+            <p className="text-sm text-[#64748b] mb-6">Purchase BECE checker voucher instantly.</p>
+            
             <div className="space-y-4">
-               <div>
-                <label className="label">Full Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
-              </div>
-              <div>
-                <label className="label">Phone number</label>
-                <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
-              </div>
+                <div>
+                    <label className="label">Full Name</label>
+                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
+                </div>
+                <div>
+                    <label className="label">Phone number</label>
+                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+                </div>
+                <div>
+                    <label className="label">Quantity</label>
+                    <select 
+                    className="input-field w-24" 
+                    value={quantities.BECE} 
+                    onChange={e => setQuantities({...quantities, BECE: Number(e.target.value)})}
+                    >
+                    {[...Array(10)].map((_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                    ))}
+                    </select>
+                </div>
+                {hasMounted && (
+                    <PaystackButton 
+                    email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
+                    amount={PRICE * quantities.BECE * 100}
+                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+                    text={`Pay GHS ${PRICE * quantities.BECE}`}
+                    onSuccess={(ref) => handleSuccess(ref, 'BECE')}
+                    currency="GHS"
+                    className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+                    />
+                )}
             </div>
-            <div className="space-y-4 flex flex-col justify-end">
-              <div>
-                <label className="label">Quantity</label>
-                <select 
-                  className="input-field w-24" 
-                  value={quantities.BECE} 
-                  onChange={e => setQuantities({...quantities, BECE: Number(e.target.value)})}
-                >
-                  {[...Array(30)].map((_, i) => (
-                    <option key={i+1} value={i+1}>{i+1}</option>
-                  ))}
-                </select>
-              </div>
-              {hasMounted && (
-                <PaystackButton 
-                  email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
-                  amount={PRICE * quantities.BECE * 100}
-                  publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                  text={`Pay GHS ${PRICE * quantities.BECE}`}
-                  onSuccess={(ref) => handleSuccess(ref, 'BECE')}
-                  currency="GHS"
-                  className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
-                />
-              )}
+            </section>
+
+            {/* CSSPS Placement Card */}
+            <section className="glass-card p-8" id="csspsForm">
+            <h2 className="text-xl font-bold mb-1 text-indigo-700">School Placement (CSSPS)</h2>
+            <p className="text-sm text-[#64748b] mb-6">Buy CSSPS Placement vouchers online.</p>
+            
+            <div className="space-y-4">
+                <div>
+                    <label className="label">Full Name</label>
+                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
+                </div>
+                <div>
+                    <label className="label">Phone number</label>
+                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+                </div>
+                <div>
+                    <label className="label">Quantity</label>
+                    <select 
+                    className="input-field w-24" 
+                    value={quantities.CSSPS} 
+                    onChange={e => setQuantities({...quantities, CSSPS: Number(e.target.value)})}
+                    >
+                    {[...Array(10)].map((_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                    ))}
+                    </select>
+                </div>
+                {hasMounted && (
+                    <PaystackButton 
+                    email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
+                    amount={PRICE * quantities.CSSPS * 100}
+                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+                    text={`Pay GHS ${PRICE * quantities.CSSPS}`}
+                    onSuccess={(ref) => handleSuccess(ref, 'CSSPS')}
+                    currency="GHS"
+                    className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+                    />
+                )}
             </div>
-          </div>
-        </section>
+            </section>
+        </div>
 
         {/* Retrieve Section */}
         <section id="retrieve" className="glass-card p-8 mb-8">
