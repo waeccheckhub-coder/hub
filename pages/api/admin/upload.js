@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   // ... rest of your API logic
-}import db from '../../../lib/db';
+import db from '../../../lib/db';
 
 export default async function handler(req, res) {
   // Only allow POST requests for security
@@ -70,4 +70,5 @@ export default async function handler(req, res) {
     console.error('Upload API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error during upload' });
   }
+}
 }
