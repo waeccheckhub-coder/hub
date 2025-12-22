@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 import { 
   LayoutDashboard, Database, LogOut, Trash2, 
   UploadCloud, FileSpreadsheet, Fingerprint, Plus, 
@@ -8,6 +10,9 @@ import {
 } from 'lucide-react';
 
 export default function Admin() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  
   const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,19 +25,33 @@ export default function Admin() {
   const [manualPin, setManualPin] = useState('');
   const fileInputRef = useRef(null);
 
-  useEffect(() => { fetchData(); }, []);
+  // Security Redirect: If unauthenticated, send to login page
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/admin/login");
+    }
+  }, [status, router]);
+
+  // Only fetch data if authenticated
+  useEffect(() => { 
+    if (status === "authenticated") {
+      fetchData(); 
+    }
+  }, [status]);
 
   const fetchData = async () => {
     try {
       const res = await axios.get('/api/admin/stats');
       setStats(res.data.stats);
       setVouchers(res.data.recentVouchers);
-    } catch (e) { toast.error("Connection Interrupted"); }
+    } catch (e) { 
+      toast.error("Connection Interrupted"); 
+    }
   };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === "text/csv" || selectedFile.name.endsWith('.csv')) {
+    if (selectedFile && (selectedFile.type === "text/csv" || selectedFile.name.endsWith('.csv'))) {
       setFile(selectedFile);
     } else {
       toast.error("Please upload a valid .csv file");
@@ -81,6 +100,21 @@ export default function Admin() {
     }
   };
 
+  // Handle Loading State
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Fingerprint size={40} className="animate-pulse text-black/20" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/40">Authenticating System...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Guard: Don't render dashboard content if not logged in
+  if (status !== "authenticated") return null;
+
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#1a1a1a] font-sans">
       <Toaster position="bottom-right" />
@@ -99,7 +133,10 @@ export default function Admin() {
             <ShieldCheck size={14} className="text-emerald-500" /> Secure Protocol Active
           </div>
         </div>
-        <button className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-black/40 hover:text-red-500 transition-colors">
+        <button 
+          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-black/40 hover:text-red-500 transition-colors"
+        >
           Terminate Session <LogOut size={14} />
         </button>
       </nav>
