@@ -39,7 +39,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
-      <Head><title>NEONCHECK | Bright WAEC Portal</title></Head>
+      <Head><title>Waec gh checkers | Bright WAEC Portal</title></Head>
       <Toaster />
 
       {/* Bright Header Decor */}
@@ -51,7 +51,7 @@ export default function Home() {
             <div className="p-2 bg-white rounded-xl shadow-lg border border-slate-100">
               <Zap className="text-cyan-500 fill-cyan-500" size={24} />
             </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-800 uppercase italic">Neon<span className="text-cyan-500">Check</span></span>
+            <span className="text-2xl font-black tracking-tighter text-slate-800 uppercase italic">WAEC GH<span className="text-cyan-500">CHECKERS</span></span>
           </div>
           <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="px-5 py-2 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-500 hover:text-cyan-500 transition-all shadow-sm">VIEW HISTORY</button>
         </header>
@@ -59,7 +59,7 @@ export default function Home() {
         <div className="text-center mb-20">
           <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}}>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-4">
-              Instant <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Results.</span>
+              Instant <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Results</span>
             </h1>
             <p className="text-slate-500 font-medium text-lg max-w-xl mx-auto uppercase tracking-widest text-sm">Official WAEC Result Checkers & Placement Vouchers</p>
           </motion.div>
