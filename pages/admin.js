@@ -281,11 +281,14 @@ const handleDelete = async (serial) => {
                         {v.status}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-right">
-                      <button className="text-black/10 hover:text-red-500 transition-colors">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+                    <<td className="px-8 py-5 text-right">
+  <button 
+    onClick={() => handleDelete(v.serial)} // ADD THIS LINE
+    className="text-black/10 hover:text-red-500 transition-colors"
+  >
+    <Trash2 size={16} />
+  </button>
+</td>
                   </tr>
                 ))}
               </tbody>
