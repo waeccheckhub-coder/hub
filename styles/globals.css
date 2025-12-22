@@ -3,33 +3,5 @@
 @tailwind utilities;
 
 body {
-  background-color: #050505;
-  color: white;
-  background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050505 100%);
-  min-height: 100vh;
-}
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.neon-glow {
-  box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #000; 
-}
-::-webkit-scrollbar-thumb {
-  background: #333; 
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #00f3ff; 
+  @apply antialiased;
 }
