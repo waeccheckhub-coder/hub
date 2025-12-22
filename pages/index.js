@@ -219,51 +219,47 @@ export default function Home() {
             </section>
 
             {/* CSSPS Placement Card */}
-            <section className={`glass-card p-8 relative overflow-hidden transition-all duration-500 ${stock.CSSPS <= 0 ? 'opacity-60 grayscale-[0.5]' : ''}`} id="csspsForm">
-            {stock.CSSPS <= 0 && (
-              <div className="absolute top-4 right-[-35px] bg-red-500 text-white text-[10px] font-bold py-1 px-10 rotate-45 z-10 shadow-md">
-                OUT OF STOCK
-              </div>
-            )}
-            <h2 className="text-xl font-bold mb-1 text-indigo-700">School Placement (CSSPS)</h2>
-            <p className="text-sm text-[#64748b] mb-6">Buy CSSPS Placement vouchers online.</p>
-            
-            <div className={`space-y-4 ${stock.CSSPS <= 0 ? 'pointer-events-none' : ''}`}>
-                <div>
-                    <label className="label">Full Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" disabled={stock.CSSPS <= 0} />
-                </div>
-                <div>
-                    <label className="label">Phone number</label>
-                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" disabled={stock.CSSPS <= 0} />
-                </div>
-                <div>
-                    <label className="label">Quantity</label>
-                    <select 
-                    className="input-field w-24" 
-                    value={quantities.CSSPS} 
-                    onChange={e => setQuantities({...quantities, CSSPS: Number(e.target.value)})}
-                    disabled={stock.CSSPS <= 0}
-                    >
-                    {[...Array(10)].map((_, i) => (
-                        <option key={i+1} value={i+1}>{i+1}</option>
-                    ))}
-                    </select>
-                </div>
-                {hasMounted && (
-                    <PaystackButton 
-                    email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
-                    amount={PRICE * quantities.CSSPS * 100}
-                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text={stock.CSSPS <= 0 ? 'Unavailable' : `Pay GHS ${PRICE * quantities.CSSPS}`}
-                    onSuccess={(ref) => handleSuccess(ref, 'CSSPS')}
-                    currency="GHS"
-                    disabled={stock.CSSPS <= 0}
-                    className={`w-full py-4 rounded-[14px] font-bold transition-all ${stock.CSSPS <= 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white shadow-lg shadow-indigo-200 hover:-translate-y-1'}`}
-                    />
-                )}
-            </div>
-            </section>
+            {/* CSSPS Placement Card - Only renders if stock > 0 */}
+{stock.CSSPS > 0 && (
+  <section className="glass-card p-8 relative overflow-hidden transition-all duration-500" id="csspsForm">
+    <h2 className="text-xl font-bold mb-1 text-indigo-700">School Placement (CSSPS)</h2>
+    <p className="text-sm text-[#64748b] mb-6">Buy CSSPS Placement vouchers online.</p>
+    
+    <div className="space-y-4">
+      <div>
+        <label className="label">Full Name</label>
+        <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
+      </div>
+      <div>
+        <label className="label">Phone number</label>
+        <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+      </div>
+      <div>
+        <label className="label">Quantity</label>
+        <select 
+          className="input-field w-24" 
+          value={quantities.CSSPS} 
+          onChange={e => setQuantities({...quantities, CSSPS: Number(e.target.value)})}
+        >
+          {[...Array(10)].map((_, i) => (
+            <option key={i+1} value={i+1}>{i+1}</option>
+          ))}
+        </select>
+      </div>
+      {hasMounted && (
+        <PaystackButton 
+          email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
+          amount={PRICE * quantities.CSSPS * 100}
+          publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+          text={`Pay GHS ${PRICE * quantities.CSSPS}`}
+          onSuccess={(ref) => handleSuccess(ref, 'CSSPS')}
+          currency="GHS"
+          className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+        />
+      )}
+    </div>
+  </section>
+)}
         </div>
 
         {/* Retrieve Section */}
