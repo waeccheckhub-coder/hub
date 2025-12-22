@@ -121,7 +121,17 @@ export default function Admin() {
 
   // Guard: Don't render dashboard content if not logged in
   if (status !== "authenticated") return null;
+const handleDelete = async (serial) => {
+  if (!confirm(`Are you sure you want to delete voucher ${serial}?`)) return;
 
+  try {
+    await axios.delete(`/api/admin/delete-voucher?serial=${serial}`);
+    toast.success("Record Purged");
+    fetchData(); // Refresh the list and stats
+  } catch (e) {
+    toast.error("Deletion Failed");
+  }
+};
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#1a1a1a] font-sans">
       <Toaster position="bottom-right" />
