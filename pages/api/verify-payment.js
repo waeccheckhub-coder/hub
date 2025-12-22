@@ -26,16 +26,29 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "OUT_OF_STOCK" });
     }
 
-    // 3. Mark as Sold (Ensure you ran the ALTER TABLE command for sold_to and sold_at)
+    // 3. Mark as Sold
     const voucherIds = vouchers.rows.map(v => v.id);
     await db.query(
       'UPDATE vouchers SET status = $1, sold_to = $2, sold_at = NOW() WHERE id = ANY($3)',
       ['sold', phone, voucherIds]
     );
 
-    // 4. ARKESEL SMS INTEGRATION
-    const voucherDetails = vouchers.rows.map(v => `S/N: ${v.serial} PIN: ${v.pin}`).join(' | ');
-    const smsMessage = `CheckerCard: Your ${type} Voucher is ${voucherDetails}. Keep it safe.`;
+    // 4. PORTAL LINK MAPPING
+    const getPortalLink = (vType) => {
+      const t = vType?.toUpperCase() || "";
+      if (t.includes('WASSCE') || t.includes('NOVDEC')) return 'https://ghana.waecdirect.org';
+      if (t.includes('BECE')) return 'https://eresults.waecgh.org';
+      if (t.includes('CSSPS') || t.includes('PLACEMENT')) return 'https://www.cssps.gov.gh';
+      return 'https://waeccardsonline.com'; // Default fallback
+    };
+
+    const portalLink = getPortalLink(type);
+
+    // 5. ARKESEL SMS INTEGRATION
+    // Formatted for better readability on mobile screens
+    const voucherDetails = vouchers.rows.map(v => `S/N: ${v.serial} PIN: ${v.pin}`).join('\n');
+    
+    const smsMessage = `CheckerCard: Your ${type} purchase was successful.\n\n${voucherDetails}\n\nCheck Result here: ${portalLink}\n\nThank you for choosing Waec Gh Cards Online.`;
     
     // Format phone to 233 format
     const formattedPhone = phone.startsWith('0') ? '233' + phone.substring(1) : phone;
@@ -46,14 +59,13 @@ export default async function handler(req, res) {
           action: 'send-sms',
           api_key: process.env.ARKESEL_API_KEY,
           to: formattedPhone,
-          from: 'CheckerCard', // Use your Arkesel approved Sender ID
+          from: 'CheckerCard', 
           sms: smsMessage
         }
       });
       console.log(`SMS successfully triggered via Arkesel to ${formattedPhone}`);
     } catch (smsErr) {
       console.error("Arkesel Error:", smsErr.response?.data || smsErr.message);
-      // We don't block the user's success page if SMS fails, but we log it
     }
 
     return res.status(200).json({ vouchers: vouchers.rows });
