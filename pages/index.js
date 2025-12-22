@@ -14,7 +14,9 @@ export default function Home() {
   const [retrieveInput, setRetrieveInput] = useState('');
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [stock, setStock] = useState({ WASSCE: 100, BECE: 100, CSSPS: 100 });
+  
+  // Initial stock set to 0 to prevent accidental sales before checkStock completes
+  const [stock, setStock] = useState({ WASSCE: 0, BECE: 0, CSSPS: 0 });
 
   useEffect(() => {
     setHasMounted(true);
@@ -25,7 +27,10 @@ export default function Home() {
     try {
       const res = await axios.get('/api/public-stock');
       setStock(res.data);
-    } catch (e) { console.error("Stock check failed"); }
+    } catch (e) { 
+      console.error("Stock check failed"); 
+      // Fallback: assume in stock if API fails, or keep at 0 for safety
+    }
   };
 
   const handleSuccess = async (ref, id) => {
@@ -115,18 +120,23 @@ export default function Home() {
           </div>
 
           {/* WASSCE / NOVDEC Card */}
-          <div className="glass-card p-6 md:p-8" id="wassceForm">
+          <div className={`glass-card p-6 md:p-8 relative overflow-hidden transition-all duration-500 ${stock.WASSCE <= 0 ? 'opacity-60 grayscale-[0.5]' : ''}`} id="wassceForm">
+            {stock.WASSCE <= 0 && (
+              <div className="absolute top-4 right-[-35px] bg-red-500 text-white text-[10px] font-bold py-1 px-10 rotate-45 z-10 shadow-md">
+                OUT OF STOCK
+              </div>
+            )}
             <h3 className="text-xl font-bold mb-1 text-indigo-700">WASSCE / NOVDEC</h3>
             <p className="text-sm text-[#64748b] mb-4">Results Checker Voucher — Delivered via SMS.</p>
             
-            <div className="space-y-4">
+            <div className={`space-y-4 ${stock.WASSCE <= 0 ? 'pointer-events-none' : ''}`}>
               <div>
                 <label className="label">Full Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} className="input-field" placeholder="John Doe" />
+                <input value={name} onChange={e => setName(e.target.value)} className="input-field" placeholder="John Doe" disabled={stock.WASSCE <= 0} />
               </div>
               <div>
                 <label className="label">Phone number</label>
-                <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+                <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" disabled={stock.WASSCE <= 0} />
               </div>
               <div>
                 <label className="label">Quantity</label>
@@ -134,6 +144,7 @@ export default function Home() {
                   className="input-field w-24" 
                   value={quantities.WASSCE} 
                   onChange={e => setQuantities({...quantities, WASSCE: Number(e.target.value)})}
+                  disabled={stock.WASSCE <= 0}
                 >
                   {[...Array(10)].map((_, i) => (
                     <option key={i+1} value={i+1}>{i+1}</option>
@@ -146,11 +157,12 @@ export default function Home() {
                   email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
                   amount={PRICE * quantities.WASSCE * 100}
                   publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                  text={`Pay GHS ${PRICE * quantities.WASSCE}`}
+                  text={stock.WASSCE <= 0 ? 'Unavailable' : `Pay GHS ${PRICE * quantities.WASSCE}`}
                   onSuccess={(ref) => handleSuccess(ref, 'WASSCE')}
                   onClose={() => toast.error("Payment cancelled")}
                   currency="GHS"
-                  className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+                  disabled={stock.WASSCE <= 0}
+                  className={`w-full py-4 rounded-[14px] font-bold transition-all ${stock.WASSCE <= 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white shadow-lg shadow-indigo-200 hover:-translate-y-1'}`}
                 />
               )}
             </div>
@@ -160,18 +172,23 @@ export default function Home() {
         {/* BECE and CSSPS Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* BECE Card */}
-            <section className="glass-card p-8" id="beceForm">
+            <section className={`glass-card p-8 relative overflow-hidden transition-all duration-500 ${stock.BECE <= 0 ? 'opacity-60 grayscale-[0.5]' : ''}`} id="beceForm">
+            {stock.BECE <= 0 && (
+              <div className="absolute top-4 right-[-35px] bg-red-500 text-white text-[10px] font-bold py-1 px-10 rotate-45 z-10 shadow-md">
+                OUT OF STOCK
+              </div>
+            )}
             <h2 className="text-xl font-bold mb-1 text-indigo-700">BECE Voucher</h2>
             <p className="text-sm text-[#64748b] mb-6">Purchase BECE checker voucher instantly.</p>
             
-            <div className="space-y-4">
+            <div className={`space-y-4 ${stock.BECE <= 0 ? 'pointer-events-none' : ''}`}>
                 <div>
                     <label className="label">Full Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
+                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" disabled={stock.BECE <= 0} />
                 </div>
                 <div>
                     <label className="label">Phone number</label>
-                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" disabled={stock.BECE <= 0} />
                 </div>
                 <div>
                     <label className="label">Quantity</label>
@@ -179,6 +196,7 @@ export default function Home() {
                     className="input-field w-24" 
                     value={quantities.BECE} 
                     onChange={e => setQuantities({...quantities, BECE: Number(e.target.value)})}
+                    disabled={stock.BECE <= 0}
                     >
                     {[...Array(10)].map((_, i) => (
                         <option key={i+1} value={i+1}>{i+1}</option>
@@ -190,28 +208,34 @@ export default function Home() {
                     email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
                     amount={PRICE * quantities.BECE * 100}
                     publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text={`Pay GHS ${PRICE * quantities.BECE}`}
+                    text={stock.BECE <= 0 ? 'Unavailable' : `Pay GHS ${PRICE * quantities.BECE}`}
                     onSuccess={(ref) => handleSuccess(ref, 'BECE')}
                     currency="GHS"
-                    className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+                    disabled={stock.BECE <= 0}
+                    className={`w-full py-4 rounded-[14px] font-bold transition-all ${stock.BECE <= 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white shadow-lg shadow-indigo-200 hover:-translate-y-1'}`}
                     />
                 )}
             </div>
             </section>
 
             {/* CSSPS Placement Card */}
-            <section className="glass-card p-8" id="csspsForm">
+            <section className={`glass-card p-8 relative overflow-hidden transition-all duration-500 ${stock.CSSPS <= 0 ? 'opacity-60 grayscale-[0.5]' : ''}`} id="csspsForm">
+            {stock.CSSPS <= 0 && (
+              <div className="absolute top-4 right-[-35px] bg-red-500 text-white text-[10px] font-bold py-1 px-10 rotate-45 z-10 shadow-md">
+                OUT OF STOCK
+              </div>
+            )}
             <h2 className="text-xl font-bold mb-1 text-indigo-700">School Placement (CSSPS)</h2>
             <p className="text-sm text-[#64748b] mb-6">Buy CSSPS Placement vouchers online.</p>
             
-            <div className="space-y-4">
+            <div className={`space-y-4 ${stock.CSSPS <= 0 ? 'pointer-events-none' : ''}`}>
                 <div>
                     <label className="label">Full Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" />
+                    <input value={name} onChange={e => setName(e.target.value)} className="input-field" disabled={stock.CSSPS <= 0} />
                 </div>
                 <div>
                     <label className="label">Phone number</label>
-                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" />
+                    <input value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="0244123456" disabled={stock.CSSPS <= 0} />
                 </div>
                 <div>
                     <label className="label">Quantity</label>
@@ -219,6 +243,7 @@ export default function Home() {
                     className="input-field w-24" 
                     value={quantities.CSSPS} 
                     onChange={e => setQuantities({...quantities, CSSPS: Number(e.target.value)})}
+                    disabled={stock.CSSPS <= 0}
                     >
                     {[...Array(10)].map((_, i) => (
                         <option key={i+1} value={i+1}>{i+1}</option>
@@ -230,10 +255,11 @@ export default function Home() {
                     email={phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com'}
                     amount={PRICE * quantities.CSSPS * 100}
                     publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text={`Pay GHS ${PRICE * quantities.CSSPS}`}
+                    text={stock.CSSPS <= 0 ? 'Unavailable' : `Pay GHS ${PRICE * quantities.CSSPS}`}
                     onSuccess={(ref) => handleSuccess(ref, 'CSSPS')}
                     currency="GHS"
-                    className="w-full bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white py-4 rounded-[14px] font-bold shadow-lg shadow-indigo-200"
+                    disabled={stock.CSSPS <= 0}
+                    className={`w-full py-4 rounded-[14px] font-bold transition-all ${stock.CSSPS <= 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] text-white shadow-lg shadow-indigo-200 hover:-translate-y-1'}`}
                     />
                 )}
             </div>
