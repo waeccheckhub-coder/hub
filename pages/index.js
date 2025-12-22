@@ -154,54 +154,55 @@ export default function Home() {
         </div>
 
         {/* History Section stays as is for those who need it */}
-        <section id="history" className="bg-slate-900 rounded-[2.5rem] p-8 md:p-16 text-white overflow-hidden relative">
-          <div className="grid md:grid-cols-2 gap-12 relative z-10">
-            <div>
-              <h2 className="text-3xl font-black tracking-tighter uppercase mb-4">Check Purchase History</h2>
-              <p className="text-slate-400 text-sm mb-8">Lost your codes? Enter your phone number to see all your vouchers.</p>
-              <div className="flex gap-2">
-                <input 
-                  type="tel" 
-                  placeholder="024XXXXXXX" 
-                  value={retrievePhone}
-                  onChange={(e) => setRetrievePhone(e.target.value)}
-                  className="flex-1 bg-white/10 border border-white/10 rounded-xl px-6 py-4 outline-none focus:bg-white/20 transition-all font-bold"
-                />
-                <button 
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      const res = await axios.post('/api/retrieve', { phone: retrievePhone });
-                      setRetrievedData(res.data);
-                    } catch (e) { toast.error("No records found"); }
-                    setLoading(false);
-                  }}
-                  className="bg-blue-600 px-6 rounded-xl hover:bg-white hover:text-blue-600 transition-all"
-                >
-                  <Search size={20} />
-                </button>
-              </div>
-            </div>
+        <<section id="history" className="mb-24 px-1">
+  <div className="flex flex-col lg:grid lg:grid-cols-2 bg-slate-900 rounded-[2rem] overflow-hidden shadow-xl">
+    {/* Left Side: Form */}
+    <div className="p-8 md:p-16 text-white border-b border-white/5 lg:border-b-0 lg:border-r">
+      <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
+        <History size={24} />
+      </div>
+      <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase mb-4">Lost your code?</h2>
+      <p className="text-slate-400 text-sm mb-8">Enter the phone number you used to purchase to retrieve your codes instantly.</p>
+      
+      <form onSubmit={/* your existing handleSubmit */} className="flex flex-col gap-3">
+        <input 
+          type="tel" 
+          placeholder="Phone Number (024...)" 
+          className="w-full bg-white/10 border border-white/10 px-5 py-4 rounded-xl outline-none focus:ring-2 ring-blue-500/50 text-white font-bold placeholder:text-white/20" 
+        />
+        <button className="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-white hover:text-blue-600 transition-all text-xs uppercase tracking-widest">
+          Retrieve Vouchers
+        </button>
+      </form>
+    </div>
 
-            <div className="bg-white/5 rounded-2xl p-6 border border-white/5 min-h-[200px]">
-               {retrievedData ? (
-                 <div className="space-y-3">
-                   {retrievedData.map((item, i) => (
-                     <div key={i} className="flex justify-between items-center p-4 bg-white/10 rounded-lg">
-                       <div>
-                         <p className="text-[10px] font-black text-blue-400 uppercase">{item.type}</p>
-                         <p className="text-[10px] font-mono opacity-40">{item.serial}</p>
-                       </div>
-                       <p className="font-black text-xl">{item.pin}</p>
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">Results will appear here</div>
-               )}
+    {/* Right Side: Results */}
+    <div className="p-8 md:p-16 bg-white/5 flex flex-col min-h-[300px]">
+      <div className="mb-6 flex items-center justify-between">
+        <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Your Purchase History</span>
+      </div>
+      
+      {!retrievedData ? (
+        <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl p-6 text-center">
+           <Search size={32} className="text-white/10 mb-2" />
+           <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">No history loaded</p>
+        </div>
+      ) : (
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          {retrievedData.map((item, i) => (
+            <div key={i} className="p-5 bg-white/10 border border-white/10 rounded-xl flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <div>
+                <p className="text-[10px] font-black text-blue-500 uppercase mb-1">{item.type}</p>
+                <p className="text-[10px] font-mono text-white/40 break-all">{item.serial}</p>
+              </div>
+              <p className="text-2xl font-black text-white tracking-tighter">{item.pin}</p>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</section>
       </main>
 
       <footer className="py-12 text-center border-t border-slate-100">
