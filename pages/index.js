@@ -16,6 +16,7 @@ export default function Home() {
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Auto-generate email to satisfy Paystack requirements
   const generatedEmail = phone ? `${phone}@neoncheck.com` : 'customer@neoncheck.com';
 
   const vouchers = [
@@ -25,31 +26,47 @@ export default function Home() {
   ];
 
   const handleSuccess = async (ref) => {
-    const t = toast.loading('VERIFYING...');
+    const t = toast.loading('VERIFYING PAYMENT...');
     try {
-      const res = await axios.post('/api/verify-payment', { reference: ref.reference, quantity, type: selectedVoucher.id, phone });
+      const res = await axios.post('/api/verify-payment', { 
+        reference: ref.reference, 
+        quantity, 
+        type: selectedVoucher?.id, 
+        phone 
+      });
       localStorage.setItem('lastOrder', JSON.stringify(res.data.vouchers));
       router.push(`/thank-you?ref=${ref.reference}`);
       toast.dismiss(t);
     } catch (e) {
-      toast.error('Check Stock or Connection');
+      toast.error('Verification failed. Contact support.');
       toast.dismiss(t);
     }
   };
- // Add this inside your Home component before the return
-const handleClose = () => {
-  toast.error("Payment Cancelled");
-};
 
-const handleClose = () => {
-  toast.error("Transaction cancelled.");
+  const handleClose = () => {
+    toast.error("Transaction Cancelled");
+  };
+
+  const handleRetrieve = async (e) => {
+    e.preventDefault();
+    if (!retrievePhone) return toast.error("Enter phone number");
+    setLoading(true);
+    try {
+      const res = await axios.post('/api/retrieve', { phone: retrievePhone });
+      setRetrievedData(res.data);
+      if (res.data.length === 0) toast.error("No records found");
+    } catch (err) {
+      toast.error("Connection Error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
-      <Head><title>Waec gh checkers | Bright WAEC Portal</title></Head>
-      <Toaster />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-32">
+      <Head><title>NEONCHECK | WAEC PORTAL</title></Head>
+      <Toaster position="top-right" />
 
-      {/* Bright Header Decor */}
       <div className="h-2 w-full bg-gradient-to-r from-cyan-400 via-pink-500 to-emerald-400"></div>
 
       <div className="max-w-6xl mx-auto px-6 pt-12">
@@ -58,21 +75,19 @@ const handleClose = () => {
             <div className="p-2 bg-white rounded-xl shadow-lg border border-slate-100">
               <Zap className="text-cyan-500 fill-cyan-500" size={24} />
             </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-800 uppercase italic">WAEC GH<span className="text-cyan-500">CHECKERS</span></span>
+            <span className="text-2xl font-black tracking-tighter text-slate-800 uppercase italic">Neon<span className="text-cyan-500">Check</span></span>
           </div>
           <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="px-5 py-2 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-500 hover:text-cyan-500 transition-all shadow-sm">VIEW HISTORY</button>
         </header>
 
         <div className="text-center mb-20">
-          <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}}>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-4">
-              Instant <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Results</span>
-            </h1>
-            <p className="text-slate-500 font-medium text-lg max-w-xl mx-auto uppercase tracking-widest text-sm">Official WAEC Result Checkers & Placement Vouchers</p>
-          </motion.div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-4">
+            Instant <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 uppercase italic">Results.</span>
+          </h1>
+          <p className="text-slate-500 font-medium uppercase tracking-[0.2em] text-xs">Official WAEC Result Checkers • High Speed Delivery</p>
         </div>
 
-        {/* Colorful Grid */}
+        {/* Voucher Selection Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-32">
           {vouchers.map((v) => (
             <motion.div
@@ -82,14 +97,14 @@ const handleClose = () => {
               className={`p-10 rounded-[2.5rem] ${v.color} border-2 ${v.border} ${v.shadow} shadow-2xl cursor-pointer transition-all relative overflow-hidden group`}
             >
               <Sparkles className={`absolute -right-4 -top-4 opacity-10 ${v.text}`} size={120} />
-              <p className={`text-xs font-black uppercase tracking-widest mb-2 ${v.text} opacity-70`}>OFFICIAL STOCK</p>
-              <h3 className="text-4xl font-black mb-10 text-slate-900 italic tracking-tighter">{v.name}</h3>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${v.text} opacity-70`}>OFFICIAL STOCK</p>
+              <h3 className="text-4xl font-black mb-10 text-slate-900 italic tracking-tighter uppercase">{v.name}</h3>
               <div className="flex justify-between items-center bg-white/50 p-4 rounded-3xl backdrop-blur-sm">
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase font-black">Price</p>
                   <p className="text-2xl font-black text-slate-800 tracking-tighter">GHS {v.price}.00</p>
                 </div>
-                <div className={`p-3 rounded-2xl ${v.btn} text-white shadow-lg shadow-black/10`}>
+                <div className={`p-3 rounded-2xl ${v.btn} text-white shadow-lg shadow-black/10 transition-transform group-hover:rotate-12`}>
                   <ShoppingCart size={20} />
                 </div>
               </div>
@@ -97,21 +112,13 @@ const handleClose = () => {
           ))}
         </div>
 
-        {/* History Section - Integrated Bright Theme */}
+        {/* History/Retrieve Section */}
         <section id="history" className="max-w-2xl mx-auto py-20 border-t border-slate-200">
-          <div className="flex items-center gap-3 mb-8 justify-center">
-            <History className="text-pink-500" />
+          <div className="flex items-center gap-3 mb-8 justify-center text-pink-500">
+            <History size={24} />
             <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">Retrieve Previous Vouchers</h2>
           </div>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            setLoading(true);
-            try {
-              const res = await axios.post('/api/retrieve', { phone: retrievePhone });
-              setRetrievedData(res.data);
-            } catch { toast.error("Check Connection"); }
-            setLoading(false);
-          }} className="flex gap-3 mb-12">
+          <form onSubmit={handleRetrieve} className="flex gap-3 mb-12">
             <input 
               type="tel" placeholder="Enter Phone Number" value={retrievePhone}
               onChange={(e) => setRetrievePhone(e.target.value)}
@@ -124,22 +131,22 @@ const handleClose = () => {
 
           <div className="space-y-4">
             {retrievedData?.map((item, i) => (
-              <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={i} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                 <div>
                   <span className="px-3 py-1 bg-cyan-100 text-cyan-700 text-[10px] font-black rounded-full uppercase mb-2 block w-fit">{item.type}</span>
-                  <p className="font-mono text-xs text-slate-400 tracking-tighter uppercase font-bold">SN: {item.serial}</p>
+                  <p className="font-mono text-xs text-slate-400 tracking-tighter font-bold">SN: {item.serial}</p>
                 </div>
                 <div className="text-right">
                    <p className="text-2xl font-black font-mono tracking-widest text-slate-800">{item.pin}</p>
-                   <p className="text-[10px] text-slate-300 font-bold">{new Date(item.created_at).toLocaleDateString()}</p>
+                   <p className="text-[10px] text-slate-300 font-bold italic">{new Date(item.created_at).toLocaleDateString()}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
       </div>
 
-      {/* Bright Checkout Bar */}
+      {/* Floating Checkout Drawer */}
       <AnimatePresence>
         {selectedVoucher && (
           <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} className="fixed bottom-6 inset-x-6 z-50">
@@ -148,7 +155,7 @@ const handleClose = () => {
                 <div className={`p-4 rounded-2xl ${selectedVoucher.btn} text-white shadow-lg`}><ShoppingCart/></div>
                 <div>
                   <h4 className="font-black italic text-xl text-slate-800">{selectedVoucher?.full}</h4>
-                  <p className="font-black text-cyan-500">Total: GHS {(selectedVoucher?.price * quantity).toFixed(2)}</p>
+                  <p className="font-black text-cyan-500">Total: GHS {((selectedVoucher?.price || 0) * quantity).toFixed(2)}</p>
                 </div>
               </div>
 
@@ -162,19 +169,19 @@ const handleClose = () => {
                   type="tel" placeholder="YOUR PHONE" value={phone} onChange={(e)=>setPhone(e.target.value)}
                   className="bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 w-44 font-bold text-center outline-none focus:ring-2 ring-cyan-400 transition"
                 />
+                
                 {phone.length >= 10 ? (
                   <PaystackButton 
-  className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
-  email={generatedEmail}
-  // Use optional chaining to prevent the "null" error we discussed
-  amount={(selectedVoucher?.price || 0) * quantity * 100}
-  publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-  text="PAY NOW"
-  onSuccess={handleSuccess}
-  onClose={handleClose} // THIS IS THE CRITICAL FIX
-/>
+                    className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter italic"
+                    email={generatedEmail}
+                    amount={(selectedVoucher?.price || 0) * quantity * 100}
+                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+                    text="PURCHASE NOW"
+                    onSuccess={handleSuccess}
+                    onClose={handleClose}
+                  />
                 ) : (
-                  <button disabled className="bg-slate-100 text-slate-300 font-black px-12 py-4 rounded-2xl cursor-not-allowed uppercase tracking-tighter">Enter Phone</button>
+                  <button disabled className="bg-slate-100 text-slate-300 font-black px-12 py-4 rounded-2xl cursor-not-allowed uppercase tracking-tighter italic">Enter Phone</button>
                 )}
                 <button onClick={() => setSelectedVoucher(null)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X /></button>
               </div>
