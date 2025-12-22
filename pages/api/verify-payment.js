@@ -46,7 +46,7 @@ export default async function handler(req, res) {
           action: 'send-sms',
           api_key: process.env.ARKESEL_API_KEY,
           to: formattedPhone,
-          from: 'NeonCheck', // Use your Arkesel approved Sender ID
+          from: 'CheckerCard', // Use your Arkesel approved Sender ID
           sms: smsMessage
         }
       });
