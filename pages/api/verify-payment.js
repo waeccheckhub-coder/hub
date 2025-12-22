@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     // Formatted for better readability on mobile screens
     const voucherDetails = vouchers.rows.map(v => `S/N: ${v.serial} PIN: ${v.pin}`).join('\n');
     
-    const smsMessage = `CheckerCard: Your ${type} purchase was successful.\n\n${voucherDetails}\n\nCheck Result here: ${portalLink}\n\nThank you for choosing Waec Gh Cards Online.`;
+    const smsMessage = `CheckerCard: Your ${type} purchase was successful.\n\n${voucherDetails}\n\nCheck Result here: ${portalLink}\n\nThank you for choosing waec gh checkers.`;
     
     // Format phone to 233 format
     const formattedPhone = phone.startsWith('0') ? '233' + phone.substring(1) : phone;
