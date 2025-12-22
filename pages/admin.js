@@ -286,3 +286,9 @@ export default function Admin() {
     </div>
   );
 }
+// Add this at the end of admin.js
+export const getServerSideProps = async (context) => {
+  return {
+    props: {}, // Will be passed to the page component as props
+  }
+}
