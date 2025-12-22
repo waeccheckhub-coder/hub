@@ -10,8 +10,15 @@ import {
 } from 'lucide-react';
 
 export default function Admin() {
-  const { data: session, status } = useSession();
+  const sessionContext = useSession(); // Don't destructure yet
   const router = useRouter();
+
+  // Add this safety check
+  const session = sessionContext?.data;
+  const status = sessionContext?.status;
+
+  const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
+  // ... rest of your states
   
   const [stats, setStats] = useState({ total: 0, sold: 0, available: 0 });
   const [vouchers, setVouchers] = useState([]);
