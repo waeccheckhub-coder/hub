@@ -1,4 +1,4 @@
-3import { useState } from 'react';
+import { useState } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PaystackButton } from 'react-paystack';
