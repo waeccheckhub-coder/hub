@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="min-h-screen aura-bg text-[#1e293b] font-outfit selection:bg-[#4f46e5] selection:text-white">
       <Head>
-        <title>waeccardsonline — Instant WASSCE & BECE Voucher Delivery</title>
+        <title>WAEC GH CHECKERS | The hub for all your results vouchers.</title>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
       </Head>
       <Toaster position="top-center" />
@@ -81,7 +81,7 @@ export default function Home() {
               AC
             </div>
             <div>
-              <div className="font-extrabold text-[17px]">Waec Gh Cards Online</div>
+              <div className="font-extrabold text-[17px]">WAEC GH CHECKERS</div>
               <div className="text-sm text-[#64748b]">Instant voucher delivery</div>
             </div>
           </div>
