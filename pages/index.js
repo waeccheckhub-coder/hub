@@ -5,7 +5,7 @@ import { PaystackButton } from 'react-paystack';
 import { useRouter } from 'next/router';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { ShoppingCart, Search, Zap, X, History, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Search, Zap, X, History, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -19,80 +19,82 @@ export default function Home() {
   const generatedEmail = phone ? `${phone}@neoncheck.com` : 'customer@neoncheck.com';
 
   const vouchers = [
-    { id: 'WASSCE', name: 'WASSCE', full: 'WASSCE Checker', color: 'text-cyan-400', border: 'border-cyan-400', glow: 'shadow-[0_0_20px_rgba(34,211,238,0.4)]', price: 30, btn: 'bg-cyan-400' },
-    { id: 'BECE', name: 'BECE', full: 'BECE Checker', color: 'text-fuchsia-500', border: 'border-fuchsia-500', glow: 'shadow-[0_0_20px_rgba(217,70,239,0.4)]', price: 30, btn: 'bg-fuchsia-500' },
-    { id: 'PLACEMENT', name: 'CSSPS', full: 'Placement Voucher', color: 'text-lime-400', border: 'border-lime-400', glow: 'shadow-[0_0_20px_rgba(163,230,53,0.4)]', price: 30, btn: 'bg-lime-400' },
+    { id: 'WASSCE', name: 'WASSCE', full: 'WASSCE Results', color: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', btn: 'bg-cyan-500', shadow: 'shadow-cyan-100', price: 30 },
+    { id: 'BECE', name: 'BECE', full: 'BECE Results', color: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200', btn: 'bg-pink-500', shadow: 'shadow-pink-100', price: 30 },
+    { id: 'PLACEMENT', name: 'CSSPS', full: 'School Placement', color: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', btn: 'bg-emerald-500', shadow: 'shadow-emerald-100', price: 30 },
   ];
 
-  const handlePaystackSuccess = async (ref) => {
-    const t = toast.loading('FETCHING VOUCHERS...');
+  const handleSuccess = async (ref) => {
+    const t = toast.loading('VERIFYING...');
     try {
       const res = await axios.post('/api/verify-payment', { reference: ref.reference, quantity, type: selectedVoucher.id, phone });
       localStorage.setItem('lastOrder', JSON.stringify(res.data.vouchers));
       router.push(`/thank-you?ref=${ref.reference}`);
       toast.dismiss(t);
     } catch (e) {
-      toast.error(e.response?.data?.error || 'Failed');
+      toast.error('Check Stock or Connection');
       toast.dismiss(t);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-cyan-500 selection:text-black">
-      <Head><title>NEONCHECK | WAEC PORTAL</title></Head>
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
+      <Head><title>NEONCHECK | Bright WAEC Portal</title></Head>
+      <Toaster />
 
-      {/* Grid Overlay */}
-      <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+      {/* Bright Header Decor */}
+      <div className="h-2 w-full bg-gradient-to-r from-cyan-400 via-pink-500 to-emerald-400"></div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-10">
-        <header className="flex justify-between items-center mb-20">
-          <div className="flex items-center gap-2 group">
-            <div className="p-2 bg-cyan-400 rounded-lg shadow-[0_0_15px_#22d3ee]">
-              <Zap className="text-black fill-black" size={24} />
+      <div className="max-w-6xl mx-auto px-6 pt-12">
+        <header className="flex justify-between items-center mb-16">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-white rounded-xl shadow-lg border border-slate-100">
+              <Zap className="text-cyan-500 fill-cyan-500" size={24} />
             </div>
-            <span className="text-2xl font-black italic tracking-tighter">NEONCHECK</span>
+            <span className="text-2xl font-black tracking-tighter text-slate-800 uppercase italic">Neon<span className="text-cyan-500">Check</span></span>
           </div>
-          <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="px-6 py-2 border border-white/20 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">History</button>
+          <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="px-5 py-2 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-500 hover:text-cyan-500 transition-all shadow-sm">VIEW HISTORY</button>
         </header>
 
-        <div className="text-center mb-24">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter italic uppercase leading-none mb-6">
-            INSTANT <br/> <span className="text-cyan-400 drop-shadow-[0_0_20px_#22d3ee]">ACCESS.</span>
-          </h1>
-          <p className="text-gray-500 font-mono tracking-[0.3em] uppercase text-xs">WAEC Result Checkers • Instant SMS Delivery</p>
+        <div className="text-center mb-20">
+          <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}}>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-4">
+              Instant <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Results.</span>
+            </h1>
+            <p className="text-slate-500 font-medium text-lg max-w-xl mx-auto uppercase tracking-widest text-sm">Official WAEC Result Checkers & Placement Vouchers</p>
+          </motion.div>
         </div>
 
-        {/* Voucher Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-40">
+        {/* Colorful Grid */}
+        <div className="grid md:grid-cols-3 gap-8 mb-32">
           {vouchers.map((v) => (
             <motion.div
               key={v.id}
-              whileHover={{ y: -10 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => setSelectedVoucher(v)}
-              className={`p-10 rounded-[2.5rem] bg-zinc-900/50 border-2 ${v.border} ${v.glow} cursor-pointer group transition-all`}
+              className={`p-10 rounded-[2.5rem] ${v.color} border-2 ${v.border} ${v.shadow} shadow-2xl cursor-pointer transition-all relative overflow-hidden group`}
             >
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">OFFICIAL STOCK</p>
-              <h3 className={`text-4xl font-black mb-6 italic ${v.color}`}>{v.name}</h3>
-              <div className="flex justify-between items-end">
+              <Sparkles className={`absolute -right-4 -top-4 opacity-10 ${v.text}`} size={120} />
+              <p className={`text-xs font-black uppercase tracking-widest mb-2 ${v.text} opacity-70`}>OFFICIAL STOCK</p>
+              <h3 className="text-4xl font-black mb-10 text-slate-900 italic tracking-tighter">{v.name}</h3>
+              <div className="flex justify-between items-center bg-white/50 p-4 rounded-3xl backdrop-blur-sm">
                 <div>
-                  <p className="text-[10px] text-gray-500 uppercase font-black">Price</p>
-                  <p className="text-3xl font-black italic">GHS {v.price}.00</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-black">Price</p>
+                  <p className="text-2xl font-black text-slate-800 tracking-tighter">GHS {v.price}.00</p>
                 </div>
-                <div className={`p-4 rounded-2xl ${v.btn} text-black group-hover:rotate-12 transition-transform shadow-lg`}>
-                  <ArrowRight />
+                <div className={`p-3 rounded-2xl ${v.btn} text-white shadow-lg shadow-black/10`}>
+                  <ShoppingCart size={20} />
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Retrieve Section */}
-        <section id="history" className="max-w-2xl mx-auto py-20 border-t border-white/10">
-          <div className="flex items-center gap-3 mb-8">
-            <History className="text-fuchsia-500" />
-            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Retrieve Vouchers</h2>
+        {/* History Section - Integrated Bright Theme */}
+        <section id="history" className="max-w-2xl mx-auto py-20 border-t border-slate-200">
+          <div className="flex items-center gap-3 mb-8 justify-center">
+            <History className="text-pink-500" />
+            <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">Retrieve Previous Vouchers</h2>
           </div>
           <form onSubmit={async (e) => {
             e.preventDefault();
@@ -100,69 +102,72 @@ export default function Home() {
             try {
               const res = await axios.post('/api/retrieve', { phone: retrievePhone });
               setRetrievedData(res.data);
-            } catch { toast.error("Error"); }
+            } catch { toast.error("Check Connection"); }
             setLoading(false);
-          }} className="flex gap-2 mb-10">
+          }} className="flex gap-3 mb-12">
             <input 
-              type="tel" placeholder="ENTER PHONE NUMBER" value={retrievePhone}
+              type="tel" placeholder="Enter Phone Number" value={retrievePhone}
               onChange={(e) => setRetrievePhone(e.target.value)}
-              className="flex-1 bg-zinc-900 border border-white/10 rounded-2xl px-6 py-4 font-bold focus:border-fuchsia-500 outline-none transition-all"
+              className="flex-1 bg-white border border-slate-200 rounded-3xl px-8 py-5 text-lg font-bold text-slate-700 focus:border-cyan-400 outline-none shadow-inner"
             />
-            <button className="bg-fuchsia-500 text-black font-black px-8 rounded-2xl hover:bg-white transition-all">
-              {loading ? "..." : "FIND"}
+            <button className="bg-slate-900 text-white font-black px-10 rounded-3xl hover:bg-cyan-500 transition-all shadow-xl">
+              {loading ? "..." : "SEARCH"}
             </button>
           </form>
 
           <div className="space-y-4">
             {retrievedData?.map((item, i) => (
-              <div key={i} className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5 flex justify-between items-center">
+              <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                 <div>
-                  <p className="text-[10px] font-black text-cyan-400 uppercase">{item.type}</p>
-                  <p className="font-mono text-xs text-gray-500">SN: {item.serial}</p>
+                  <span className="px-3 py-1 bg-cyan-100 text-cyan-700 text-[10px] font-black rounded-full uppercase mb-2 block w-fit">{item.type}</span>
+                  <p className="font-mono text-xs text-slate-400 tracking-tighter uppercase font-bold">SN: {item.serial}</p>
                 </div>
-                <p className="text-2xl font-black font-mono tracking-widest text-white">{item.pin}</p>
+                <div className="text-right">
+                   <p className="text-2xl font-black font-mono tracking-widest text-slate-800">{item.pin}</p>
+                   <p className="text-[10px] text-slate-300 font-bold">{new Date(item.created_at).toLocaleDateString()}</p>
+                </div>
               </div>
             ))}
           </div>
         </section>
       </div>
 
-      {/* Checkout Drawer */}
+      {/* Bright Checkout Bar */}
       <AnimatePresence>
         {selectedVoucher && (
           <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} className="fixed bottom-6 inset-x-6 z-50">
-            <div className="max-w-5xl mx-auto bg-white text-black p-6 rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-2xl ${selectedVoucher.btn} text-black shadow-md`}><ShoppingCart/></div>
+            <div className="max-w-5xl mx-auto bg-white border border-slate-200 p-6 rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className={`p-4 rounded-2xl ${selectedVoucher.btn} text-white shadow-lg`}><ShoppingCart/></div>
                 <div>
-                  <h4 className="font-black italic text-xl tracking-tighter">{selectedVoucher.full}</h4>
-                  <p className="text-[10px] font-bold uppercase text-gray-500">GHS {(selectedVoucher.price * quantity).toFixed(2)} Total</p>
+                  <h4 className="font-black italic text-xl text-slate-800">{selectedVoucher.full}</h4>
+                  <p className="font-black text-cyan-500">Total: GHS {(selectedVoucher.price * quantity).toFixed(2)}</p>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
-                <div className="flex items-center bg-gray-100 rounded-xl p-1">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 font-black hover:text-cyan-500">-</button>
-                  <span className="w-10 text-center font-black">{quantity}</span>
-                  <button onClick={() => setQuantity(Math.min(50, quantity + 1))} className="w-8 h-8 font-black hover:text-cyan-500">+</button>
+                <div className="flex items-center bg-slate-50 rounded-2xl p-1 border border-slate-100">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 font-black hover:text-cyan-500 text-slate-400 transition">-</button>
+                  <span className="w-12 text-center font-black text-slate-700">{quantity}</span>
+                  <button onClick={() => setQuantity(Math.min(50, quantity + 1))} className="w-10 h-10 font-black hover:text-cyan-500 text-slate-400 transition">+</button>
                 </div>
                 <input 
-                  type="tel" placeholder="PHONE" value={phone} onChange={(e)=>setPhone(e.target.value)}
-                  className="bg-gray-100 rounded-xl px-4 py-3 w-36 font-bold text-center outline-none ring-2 ring-transparent focus:ring-cyan-400 transition"
+                  type="tel" placeholder="YOUR PHONE" value={phone} onChange={(e)=>setPhone(e.target.value)}
+                  className="bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 w-44 font-bold text-center outline-none focus:ring-2 ring-cyan-400 transition"
                 />
                 {phone.length >= 10 ? (
                   <PaystackButton 
-                    className="bg-black text-white font-black px-10 py-3 rounded-xl hover:bg-cyan-400 hover:text-black transition-all shadow-lg"
+                    className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
                     email={generatedEmail}
                     amount={selectedVoucher.price * quantity * 100}
                     publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text="PURCHASE NOW"
-                    onSuccess={handlePaystackSuccess}
+                    text="PAY NOW"
+                    onSuccess={handleSuccess}
                   />
                 ) : (
-                  <button disabled className="bg-gray-200 text-gray-400 font-black px-10 py-3 rounded-xl cursor-not-allowed">ENTER PHONE</button>
+                  <button disabled className="bg-slate-100 text-slate-300 font-black px-12 py-4 rounded-2xl cursor-not-allowed uppercase tracking-tighter">Enter Phone</button>
                 )}
-                <button onClick={() => setSelectedVoucher(null)} className="p-2 text-gray-400 hover:text-black"><X /></button>
+                <button onClick={() => setSelectedVoucher(null)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X /></button>
               </div>
             </div>
           </motion.div>
