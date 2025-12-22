@@ -9,7 +9,7 @@ import { ShoppingCart, Zap, X, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [phone, setPhone] = useState('');
@@ -17,9 +17,9 @@ export default function Home() {
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 1. Critical: Prevent hydration mismatch
+  // Critical: Prevent Paystack SSR initialization errors
   useEffect(() => {
-    setIsMounted(true);
+    setHasMounted(true);
   }, []);
 
   const generatedEmail = phone ? `${phone}@neoncheck.com` : 'customer@neoncheck.com';
@@ -52,14 +52,17 @@ export default function Home() {
     toast("Payment session closed.", { icon: 'ℹ️' }); 
   };
 
-  // 2. Prepare Paystack Props safely
+  // Safe Paystack Config
   const paystackProps = {
     email: generatedEmail,
-    amount: (selectedVoucher?.price || 0) * quantity * 100,
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY || '',
+    // Math.round ensures we send an integer (pesewas), preventing 400 errors
+    amount: Math.round((selectedVoucher?.price || 0) * quantity * 100),
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
     text: "Buy Now",
-    onSuccess: (reference) => handleSuccess(reference),
+    onSuccess: (ref) => handleSuccess(ref),
     onClose: handleClose,
+    currency: "GHS",
+    reference: `NC-${Math.floor(Math.random() * 1000000000)}`
   };
 
   return (
@@ -171,8 +174,7 @@ export default function Home() {
                   className="bg-slate-100 border border-slate-200 rounded-xl px-5 py-3 w-40 font-bold text-center outline-none focus:ring-2 ring-blue-500/20"
                 />
                 
-                {/* 3. Check for isMounted and phone length */}
-                {isMounted && phone.length >= 10 ? (
+                {hasMounted && phone.length >= 10 ? (
                   <PaystackButton 
                     {...paystackProps}
                     className="bg-blue-600 text-white font-bold px-10 py-3 rounded-xl hover:bg-slate-900 transition-all shadow-lg shadow-blue-100 uppercase text-sm tracking-wider"
