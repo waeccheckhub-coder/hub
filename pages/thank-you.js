@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Download, CheckCircle, Home, ExternalLink, Printer } from 'lucide-react';
+import { Download, CheckCircle, Home, ExternalLink, Printer, Copy } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function ThankYou() {
   const router = useRouter();
@@ -21,112 +22,75 @@ export default function ThankYou() {
     return null;
   };
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    
-    // Professional Header
-    doc.setFillColor(37, 99, 235); // Blue 600
-    doc.rect(0, 0, 210, 40, 'F');
-    
-    doc.setFontSize(22);
-    doc.setTextColor(255, 255, 255);
-    doc.text("WAEC CHECKERS RECEIPT", 14, 25);
-    
-    doc.setFontSize(10);
-    doc.text(`Issued on: ${new Date().toLocaleString()}`, 14, 34);
-
-    const rows = vouchers.map((v) => [v.type, v.serial, v.pin]);
-
-    doc.autoTable({
-      head: [['Voucher Type', 'Serial Number', 'PIN / Code']],
-      body: rows,
-      startY: 50,
-      theme: 'grid',
-      styles: { fontSize: 11, cellPadding: 5 },
-      headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }, // Slate 900
-    });
-
-    doc.setFontSize(9);
-    doc.setTextColor(100, 116, 139);
-    doc.text("Thank you for using WAEC Checkers. Keep this receipt safe.", 14, doc.autoTable.previous.finalY + 10);
-
-    doc.save(`WAEC-Vouchers-${Date.now()}.pdf`);
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 text-center">
+    <div className="min-h-screen bg-[#FDFDFD] flex flex-col items-center py-8 px-4 sm:justify-center">
+      <Toaster position="top-center" />
+      <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-[2rem] sm:rounded-[2.5rem] p-6 md:p-12 shadow-xl shadow-slate-200/50">
         
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle size={40} className="text-green-500" />
+        <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={32} className="text-green-500" />
+            </div>
+            <h1 className="text-2xl md:text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase">Payment Successful</h1>
+            <p className="text-sm md:text-base text-slate-500 font-medium">Your vouchers are ready below.</p>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-2 tracking-tighter uppercase">Payment Successful</h1>
-        <p className="text-slate-500 font-medium mb-10">Your vouchers are ready. A copy has also been sent via SMS.</p>
-
-        {/* Voucher Display Card */}
-        <div className="bg-slate-50 border border-slate-100 rounded-3xl overflow-hidden mb-8">
-          <div className="grid grid-cols-3 bg-slate-900 py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
-            <div>Type</div>
-            <div>Serial Number</div>
-            <div>PIN / Code</div>
-          </div>
-          
-          <div className="divide-y divide-slate-100">
-            {vouchers.map((v, i) => (
-              <div key={i} className="grid grid-cols-3 p-6 text-left items-center bg-white">
-                <div className="text-xs font-black text-blue-600 uppercase">{v.type}</div>
-                <div className="text-xs font-mono text-slate-400">{v.serial}</div>
-                <div className="text-xl font-black text-slate-900 tracking-tighter">{v.pin}</div>
-              </div>
-            ))}
-          </div>
+        {/* Voucher Display: Stacked on Mobile, Grid on Desktop */}
+        <div className="space-y-4 mb-8">
+          {vouchers.map((v, i) => (
+            <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden group">
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded">
+                            {v.type}
+                        </span>
+                        <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-tighter">Serial Number</p>
+                        <p className="text-sm font-mono text-slate-700">{v.serial}</p>
+                    </div>
+                    <button 
+                        onClick={() => copyToClipboard(v.pin)}
+                        className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 transition-colors"
+                        title="Copy PIN"
+                    >
+                        <Copy size={16} />
+                    </button>
+                </div>
+                
+                <div className="pt-4 border-t border-slate-200/60">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mb-1">Voucher PIN</p>
+                    <p className="text-3xl font-black text-slate-900 tracking-tight select-all">{v.pin}</p>
+                </div>
+            </div>
+          ))}
         </div>
 
-        {/* Dynamic Result Checkers Links */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {/* Action Links */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
           {Array.from(new Set(vouchers.map(v => v.type))).map((type) => {
             const link = getResultLink(type);
             if (!link) return null;
             return (
-              <a 
-                key={type}
-                href={link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl text-blue-700 hover:bg-blue-100 transition-all group"
+              <a key={type} href={link} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-between p-4 bg-blue-600 rounded-xl text-white hover:bg-slate-900 transition-all group"
               >
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Check Result</p>
-                  <p className="text-sm font-bold">Official {type} Portal</p>
-                </div>
-                <ExternalLink size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <span className="text-xs font-black uppercase tracking-widest">Check {type} Result</span>
+                <ExternalLink size={16} />
               </a>
             );
           })}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button 
-            onClick={generatePDF} 
-            className="flex items-center justify-center gap-2 bg-slate-900 text-white font-black px-8 py-4 rounded-2xl hover:bg-blue-600 transition-all text-xs uppercase tracking-widest"
-          >
-            <Printer size={18}/> Save Receipt (PDF)
-          </button>
-          
-          <button 
-            onClick={() => router.push('/')} 
-            className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-900 font-black px-8 py-4 rounded-2xl hover:bg-slate-50 transition-all text-xs uppercase tracking-widest"
-          >
-            <Home size={18}/> Buy More
+        <div className="flex flex-col gap-3">
+          <button onClick={() => router.push('/')} className="w-full flex items-center justify-center gap-2 bg-slate-100 text-slate-900 font-black py-4 rounded-xl text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">
+            <Home size={18}/> Buy Another Voucher
           </button>
         </div>
       </div>
-
-      <footer className="mt-12 text-center">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">WAEC GH Checkers Infrastructure</p>
-      </footer>
     </div>
   );
 }
