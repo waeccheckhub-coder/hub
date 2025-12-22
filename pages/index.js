@@ -45,7 +45,7 @@ const handleClose = () => {
 <PaystackButton 
   className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
   email={generatedEmail}
-  amount={selectedVoucher.price * quantity * 100}
+  amount={(selectedVoucher?.price || 0) * quantity * 100}
   publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
   text="PAY NOW"
   onSuccess={handleSuccess}
@@ -155,8 +155,8 @@ const handleClose = () => {
               <div className="flex items-center gap-5">
                 <div className={`p-4 rounded-2xl ${selectedVoucher.btn} text-white shadow-lg`}><ShoppingCart/></div>
                 <div>
-                  <h4 className="font-black italic text-xl text-slate-800">{selectedVoucher.full}</h4>
-                  <p className="font-black text-cyan-500">Total: GHS {(selectedVoucher.price * quantity).toFixed(2)}</p>
+                  <h4 className="font-black italic text-xl text-slate-800">{selectedVoucher?.full}</h4>
+                  <p className="font-black text-cyan-500">Total: GHS {(selectedVoucher?.price * quantity).toFixed(2)}</p>
                 </div>
               </div>
 
@@ -174,7 +174,7 @@ const handleClose = () => {
                   <PaystackButton 
                     className="bg-slate-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-cyan-500 transition-all shadow-xl uppercase tracking-tighter"
                     email={generatedEmail}
-                    amount={selectedVoucher.price * quantity * 100}
+                    amount={(selectedVoucher?.price || 0) * quantity * 100}
                     publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
                     text="PAY NOW"
                     onSuccess={handleSuccess}
