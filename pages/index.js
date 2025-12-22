@@ -1,20 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PaystackButton } from 'react-paystack';
 import { useRouter } from 'next/router';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { ShoppingCart, Search, Zap, X, History, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Zap, X, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [phone, setPhone] = useState('');
   const [retrievePhone, setRetrievePhone] = useState('');
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // 1. Critical: Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const generatedEmail = phone ? `${phone}@neoncheck.com` : 'customer@neoncheck.com';
 
@@ -42,15 +48,25 @@ export default function Home() {
     }
   };
 
-  // CRITICAL: Paystack needs a valid function here
-  const handleClose = () => { toast("Payment session closed.", { icon: 'ℹ️' }); };
+  const handleClose = () => { 
+    toast("Payment session closed.", { icon: 'ℹ️' }); 
+  };
+
+  // 2. Prepare Paystack Props safely
+  const paystackProps = {
+    email: generatedEmail,
+    amount: (selectedVoucher?.price || 0) * quantity * 100,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY || '',
+    text: "Buy Now",
+    onSuccess: (reference) => handleSuccess(reference),
+    onClose: handleClose,
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
       <Head><title>NEONCHECK | Premium WAEC Portal</title></Head>
       <Toaster position="top-center" />
 
-      {/* Modern High-End Header */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -71,7 +87,6 @@ export default function Home() {
           <p className="text-lg text-slate-500 font-medium">Official WAEC vouchers delivered instantly via SMS and on-screen.</p>
         </div>
 
-        {/* Voucher Cards */}
         <div className="grid md:grid-cols-3 gap-8 mb-32">
           {vouchers.map((v) => (
             <motion.div
@@ -95,13 +110,10 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Retrieval Section */}
         <section id="history" className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 blur-3xl -z-10 rounded-full translate-x-1/2 -translate-y-1/2"></div>
           <div className="max-w-xl">
             <h2 className="text-3xl font-bold mb-4 text-slate-900">Retrieve your vouchers</h2>
-            <p className="text-slate-500 mb-10">Lost your code? Enter your phone number used for purchase to see your order history.</p>
-            
             <form onSubmit={async (e) => {
               e.preventDefault();
               setLoading(true);
@@ -136,7 +148,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* High-End Checkout Drawer */}
       <AnimatePresence>
         {selectedVoucher && (
           <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="fixed bottom-8 inset-x-6 z-50">
@@ -160,18 +171,16 @@ export default function Home() {
                   className="bg-slate-100 border border-slate-200 rounded-xl px-5 py-3 w-40 font-bold text-center outline-none focus:ring-2 ring-blue-500/20"
                 />
                 
-                {phone.length >= 10 ? (
+                {/* 3. Check for isMounted and phone length */}
+                {isMounted && phone.length >= 10 ? (
                   <PaystackButton 
+                    {...paystackProps}
                     className="bg-blue-600 text-white font-bold px-10 py-3 rounded-xl hover:bg-slate-900 transition-all shadow-lg shadow-blue-100 uppercase text-sm tracking-wider"
-                    email={generatedEmail}
-                    amount={(selectedVoucher?.price || 0) * quantity * 100}
-                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                    text="Buy Now"
-                    onSuccess={handleSuccess}
-                    onClose={handleClose}
                   />
                 ) : (
-                  <button disabled className="bg-slate-200 text-slate-400 font-bold px-10 py-3 rounded-xl cursor-not-allowed uppercase text-sm tracking-wider">Purchase</button>
+                  <button disabled className="bg-slate-200 text-slate-400 font-bold px-10 py-3 rounded-xl cursor-not-allowed uppercase text-sm tracking-wider">
+                    {phone.length < 10 ? 'Enter Phone' : 'Loading...'}
+                  </button>
                 )}
                 <button onClick={() => setSelectedVoucher(null)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X /></button>
               </div>
