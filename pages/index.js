@@ -6,23 +6,19 @@ import { useRouter } from 'next/router';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { 
-  ShoppingCart, Zap, X, History, 
-  ArrowRight, ShieldCheck, Sparkles, 
-  ZapOff, MessageSquare, Smartphone, 
-  CheckCircle, CreditCard, Send
+  ShoppingCart, Zap, History, 
+  ShieldCheck, Search, ChevronRight 
 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
   const [hasMounted, setHasMounted] = useState(false);
-  const [selectedVoucher, setSelectedVoucher] = useState(null);
-  const [quantity, setQuantity] = useState(1);
   const [phone, setPhone] = useState('');
+  const [quantities, setQuantities] = useState({ WASSCE: 1, BECE: 1, PLACEMENT: 1 });
   const [retrievePhone, setRetrievePhone] = useState('');
   const [retrievedData, setRetrievedData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stock, setStock] = useState({ WASSCE: 0, BECE: 0, PLACEMENT: 0 });
-  const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -36,225 +32,181 @@ export default function Home() {
     } catch (e) { console.error("Stock check failed"); }
   };
 
+  const handleQtyChange = (id, delta) => {
+    setQuantities(prev => ({
+      ...prev,
+      [id]: Math.min(10, Math.max(1, prev[id] + delta))
+    }));
+  };
+
   const vouchers = [
     { id: 'WASSCE', name: 'WASSCE', full: 'WASSCE Results Checker', price: 30 },
     { id: 'BECE', name: 'BECE', full: 'BECE Results Checker', price: 30 },
     { id: 'PLACEMENT', name: 'CSSPS', full: 'School Placement Voucher', price: 30 },
   ];
 
-  const faqs = [
-    { q: "How do I receive my voucher?", a: "Once your payment is confirmed, your serial and pin will appear on the 'Thank You' page and will also be sent to you via SMS immediately." },
-    { q: "Can I buy more than one voucher?", a: "Yes. You can select up to 10 vouchers at once using the quantity selector in the checkout drawer." },
-    { q: "What if I didn't get the SMS?", a: "Don't worry! Scroll down to our 'History' section, enter your phone number, and you can retrieve all your purchased codes for free." },
-    { q: "Is my payment secure?", a: "Absolutely. We use Paystack, a PCI-certified payment processor, to handle all transactions. We never store your card or Momo details." }
-  ];
-
-  const handleSuccess = async (ref) => {
-    const t = toast.loading('Verifying payment & generating codes...');
+  const handleSuccess = async (ref, id) => {
+    const t = toast.loading('Verifying payment...');
     try {
       const res = await axios.post('/api/verify-payment', { 
         reference: ref.reference, 
-        quantity, 
-        type: selectedVoucher?.id, 
+        quantity: quantities[id], 
+        type: id, 
         phone 
       });
-      
       await checkStock();
       localStorage.setItem('lastOrder', JSON.stringify(res.data.vouchers));
       router.push(`/thank-you?ref=${ref.reference}`);
       toast.dismiss(t);
     } catch (e) {
-      toast.error('Verification failed. Please contact support.');
+      toast.error('Verification failed. Contact support.');
       toast.dismiss(t);
     }
   };
 
-  const paystackProps = {
-    email: phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com',
-    amount: Math.round((selectedVoucher?.price || 0) * quantity * 100),
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
-    text: "Pay Now",
-    onSuccess: (ref) => handleSuccess(ref),
-    onClose: () => toast("Transaction paused", { icon: '⚠️' }),
-    currency: "GHS",
-    reference: `W-CH-${Math.floor(Math.random() * 1000000000)}`
-  };
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
-      <Head><title>WAEC Checkers | Buy Result Vouchers Online</title></Head>
+    <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
+      <Head><title>WAEC Checkers | Instant Buy</title></Head>
       <Toaster position="top-center" />
 
       {/* Simplified Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+      <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 py-4">
+        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-              <Zap size={18} className="text-white fill-white" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 uppercase">WAEC<span className="text-blue-600">Checkers</span></span>
+            <Zap size={20} className="text-blue-600 fill-blue-600" />
+            <span className="text-xl font-black tracking-tighter uppercase">WAEC<span className="text-blue-600">Checkers</span></span>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase">Check History</button>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-100">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-bold text-green-700 uppercase">Online</span>
-            </div>
-          </div>
+          <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="text-[10px] font-black text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]">History</button>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 pt-10 pb-20">
-        {/* Simple Hero */}
-        <div className="mb-16">
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
-            Get your checker <span className="text-blue-600 text-shadow-sm">instantly.</span>
-          </h1>
-          <p className="text-lg text-slate-500 max-w-xl font-medium">
-            The fastest way to purchase WAEC, BECE, and Placement vouchers in Ghana.
-          </p>
+      <main className="max-w-6xl mx-auto px-4 pt-12 pb-24">
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tighter">Buy Instantly.</h1>
+          <p className="text-slate-500 font-medium">Enter your number and pay. No registration required.</p>
         </div>
 
-        {/* Improved Voucher Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-20">
+        {/* Interactive Voucher Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-24">
           {vouchers.map((v) => {
             const isOutOfStock = stock[v.id] <= 0;
-            const isSelected = selectedVoucher?.id === v.id;
+            const currentQty = quantities[v.id];
+            const totalPrice = v.price * currentQty;
+            
+            const paystackProps = {
+              email: phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com',
+              amount: Math.round(totalPrice * 100),
+              publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
+              text: `Pay GHS ${totalPrice}`,
+              onSuccess: (ref) => handleSuccess(ref, v.id),
+              onClose: () => toast("Payment cancelled", { icon: '⚠️' }),
+              currency: "GHS",
+              reference: `W-${v.id}-${Math.floor(Math.random() * 1000000)}`
+            };
+
             return (
-              <div
-                key={v.id}
-                onClick={() => !isOutOfStock && setSelectedVoucher(v)}
-                className={`group relative p-8 bg-white border-2 transition-all cursor-pointer rounded-xl ${
-                    isSelected ? 'border-blue-600 shadow-lg' : 'border-transparent hover:border-slate-200 shadow-sm'
-                } ${isOutOfStock ? 'opacity-60 grayscale' : ''}`}
-              >
-                {isOutOfStock && (
-                  <div className="absolute top-4 right-4 text-[10px] font-bold text-red-500 uppercase">Sold Out</div>
-                )}
+              <div key={v.id} className={`bg-white border-2 border-slate-100 rounded-[2rem] p-6 shadow-sm transition-all hover:border-blue-600/20 ${isOutOfStock ? 'opacity-50 grayscale' : ''}`}>
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900">{v.name}</h3>
-                  <p className="text-sm text-slate-400 font-medium">{v.full}</p>
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded">Official</span>
+                  <h3 className="text-2xl font-black mt-3 tracking-tighter">{v.name}</h3>
+                  <p className="text-xs text-slate-400 font-bold">{v.full}</p>
                 </div>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-3xl font-black text-blue-600">GHS {v.price}</span>
-                  <div className={`w-10 h-10 rounded flex items-center justify-center ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    <ArrowRight size={20} />
+
+                <div className="space-y-4">
+                  {/* Quantity Selector */}
+                  <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <span className="text-xs font-black ml-2 uppercase text-slate-400">Quantity</span>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleQtyChange(v.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm font-black">-</button>
+                      <span className="font-black text-sm w-4 text-center">{currentQty}</span>
+                      <button onClick={() => handleQtyChange(v.id, 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm font-black">+</button>
+                    </div>
                   </div>
+
+                  {/* Phone Input Inline */}
+                  <div className="relative">
+                    <input 
+                      type="tel" 
+                      placeholder="Momo Number (024...)" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold outline-none focus:ring-2 ring-blue-600/20 focus:bg-white transition-all placeholder:text-slate-300"
+                    />
+                  </div>
+
+                  {/* Dynamic Payment Button */}
+                  {hasMounted && (
+                    <PaystackButton 
+                      {...paystackProps} 
+                      className={`w-full py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${phone.length >= 10 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-slate-900' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                      disabled={phone.length < 10 || isOutOfStock}
+                    />
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-2 opacity-30">
+                  <ShieldCheck size={12} />
+                  <span className="text-[9px] font-black uppercase tracking-widest">Secure Payment</span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* History Section - Simple Card */}
-        <section id="history" className="bg-white border border-slate-200 rounded-2xl overflow-hidden mb-20 shadow-sm">
-          <div className="grid md:grid-cols-2">
-            <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-slate-100">
-              <h2 className="text-2xl font-bold mb-2">Retrieve Voucher</h2>
-              <p className="text-slate-500 text-sm mb-8">Can't find your code? Enter your phone number below to see your purchase history.</p>
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                try {
-                  const res = await axios.post('/api/retrieve', { phone: retrievePhone });
-                  setRetrievedData(res.data);
-                } catch (e) { toast.error("No records found"); }
-                setLoading(false);
-              }} className="space-y-3">
+        {/* History Section stays as is for those who need it */}
+        <section id="history" className="bg-slate-900 rounded-[2.5rem] p-8 md:p-16 text-white overflow-hidden relative">
+          <div className="grid md:grid-cols-2 gap-12 relative z-10">
+            <div>
+              <h2 className="text-3xl font-black tracking-tighter uppercase mb-4">Check Purchase History</h2>
+              <p className="text-slate-400 text-sm mb-8">Lost your codes? Enter your phone number to see all your vouchers.</p>
+              <div className="flex gap-2">
                 <input 
                   type="tel" 
                   placeholder="024XXXXXXX" 
-                  value={retrievePhone} 
-                  onChange={(e) => setRetrievePhone(e.target.value)} 
-                  className="w-full bg-slate-50 border border-slate-200 px-5 py-3 rounded-lg outline-none focus:border-blue-600 transition-colors font-bold" 
+                  value={retrievePhone}
+                  onChange={(e) => setRetrievePhone(e.target.value)}
+                  className="flex-1 bg-white/10 border border-white/10 rounded-xl px-6 py-4 outline-none focus:bg-white/20 transition-all font-bold"
                 />
-                <button className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors text-sm uppercase tracking-wider uppercase">
-                  {loading ? 'Searching...' : 'Check History'}
+                <button 
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      const res = await axios.post('/api/retrieve', { phone: retrievePhone });
+                      setRetrievedData(res.data);
+                    } catch (e) { toast.error("No records found"); }
+                    setLoading(false);
+                  }}
+                  className="bg-blue-600 px-6 rounded-xl hover:bg-white hover:text-blue-600 transition-all"
+                >
+                  <Search size={20} />
                 </button>
-              </form>
-            </div>
-            <div className="p-8 bg-slate-50 max-h-[400px] overflow-y-auto">
-              {!retrievedData ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50 italic text-sm">
-                   Your results will appear here...
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {retrievedData.map((item, i) => (
-                    <div key={i} className="p-4 bg-white border border-slate-200 rounded-lg flex justify-between items-center">
-                      <div>
-                        <p className="text-[10px] font-bold text-blue-600 uppercase">{item.type}</p>
-                        <p className="text-xs font-mono text-slate-400">{item.serial}</p>
-                      </div>
-                      <p className="text-xl font-black">{item.pin}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Simplified FAQ */}
-        <section className="max-w-2xl mx-auto">
-          <h2 className="text-center text-xl font-bold mb-8">Frequently Asked Questions</h2>
-          <div className="space-y-2">
-            {faqs.map((f, i) => (
-              <div key={i} className="border border-slate-200 bg-white rounded-lg">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full px-6 py-4 text-left flex justify-between items-center font-bold text-slate-700 text-sm">
-                  {f.q}
-                  <X size={16} className={`text-slate-300 transition-transform ${openFaq === i ? 'rotate-45' : ''}`} />
-                </button>
-                {openFaq === i && <div className="px-6 pb-4 text-sm text-slate-500 leading-relaxed border-t border-slate-50 pt-4">{f.a}</div>}
               </div>
-            ))}
+            </div>
+
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/5 min-h-[200px]">
+               {retrievedData ? (
+                 <div className="space-y-3">
+                   {retrievedData.map((item, i) => (
+                     <div key={i} className="flex justify-between items-center p-4 bg-white/10 rounded-lg">
+                       <div>
+                         <p className="text-[10px] font-black text-blue-400 uppercase">{item.type}</p>
+                         <p className="text-[10px] font-mono opacity-40">{item.serial}</p>
+                       </div>
+                       <p className="font-black text-xl">{item.pin}</p>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">Results will appear here</div>
+               )}
+            </div>
           </div>
         </section>
       </main>
 
-      {/* Modern Checkout Bottom Bar */}
-      <AnimatePresence>
-        {selectedVoucher && (
-          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-0 inset-x-0 z-[60] bg-white border-t border-slate-200 p-4 shadow-2xl">
-            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex-1 flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-100 rounded flex items-center justify-center text-slate-900 shrink-0"><ShoppingCart size={20}/></div>
-                <div>
-                  <h4 className="font-bold text-sm">{selectedVoucher?.name} x {quantity}</h4>
-                  <p className="text-blue-600 font-black text-xs">GHS {((selectedVoucher?.price || 0) * quantity).toFixed(2)}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center bg-slate-100 rounded p-1">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 font-bold">-</button>
-                  <span className="w-8 text-center font-bold text-sm">{quantity}</span>
-                  <button onClick={() => setQuantity(Math.min(10, quantity + 1))} className="w-8 h-8 font-bold">+</button>
-                </div>
-                <input 
-                  type="tel" 
-                  placeholder="Phone Number" 
-                  value={phone} 
-                  onChange={(e)=>setPhone(e.target.value)} 
-                  className="bg-slate-100 border-none rounded px-4 py-2 w-40 text-sm font-bold outline-none focus:ring-2 ring-blue-600" 
-                />
-                <PaystackButton 
-                  {...paystackProps} 
-                  className={`px-6 py-2 rounded text-sm font-bold transition-all ${phone.length >= 10 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
-                  disabled={phone.length < 10}
-                />
-                <button onClick={() => setSelectedVoucher(null)} className="p-2 text-slate-300 hover:text-red-500"><X size={20} /></button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <footer className="py-12 text-center border-t border-slate-100 bg-white">
-         <div className="flex items-center justify-center gap-2 mb-4 opacity-50">
-            <ShieldCheck size={14} className="text-blue-600" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-900">Secure Payments via Paystack</span>
-         </div>
-         <p className="text-[10px] font-medium text-slate-400">© 2025 WAEC Checkers. All rights reserved.</p>
+      <footer className="py-12 text-center border-t border-slate-100">
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-2">Powered by Paystack</p>
+        <p className="text-[9px] font-bold text-slate-400">© 2025 WAEC GH Checkers Infrastructure</p>
       </footer>
     </div>
   );
