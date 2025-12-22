@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
     // 4. ARKESEL SMS INTEGRATION
     const voucherDetails = vouchers.rows.map(v => `S/N: ${v.serial} PIN: ${v.pin}`).join(' | ');
-    const smsMessage = `NeonCheck: Your ${type} Voucher is ${voucherDetails}. Keep it safe.`;
+    const smsMessage = `CheckerCard: Your ${type} Voucher is ${voucherDetails}. Keep it safe.`;
     
     // Format phone to 233 format
     const formattedPhone = phone.startsWith('0') ? '233' + phone.substring(1) : phone;
