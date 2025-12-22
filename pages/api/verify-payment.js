@@ -6,35 +6,35 @@ export default async function handler(req, res) {
 
   const { reference, quantity, type, phone } = req.body;
 
-  // LOGGING: Check this in your Vercel logs or Terminal
-  console.log("PAYMENT VERIFY ATTEMPT:", { reference, quantity, type, phone });
-
-  if (!reference || !type || !phone) {
-    return res.status(400).json({ error: "Missing required fields in request body" });
-  }
-
   try {
-    // 1. Verify with Paystack (Server-to-Server)
+    // 1. Verify with Paystack
     const paystackRes = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
-    );
+    ).catch(e => {
+      console.error("Paystack API Error:", e.response?.data);
+      return null;
+    });
 
-    if (paystackRes.data.data.status !== 'success') {
-      return res.status(400).json({ error: "Paystack payment not verified" });
+    if (!paystackRes || paystackRes.data.data.status !== 'success') {
+      return res.status(400).json({ error: "PAYSTACK_VERIFICATION_FAILED" });
     }
 
-    // 2. Fetch available vouchers from DB
+    // 2. Check Database Stock (MOST LIKELY CULPRIT)
     const vouchers = await db.query(
       'SELECT id, serial, pin FROM vouchers WHERE type = $1 AND status = $2 LIMIT $3',
       [type, 'available', quantity]
     );
 
     if (vouchers.rowCount < quantity) {
-      return res.status(400).json({ error: "Insufficient stock for this voucher type" });
+      return res.status(400).json({ 
+        error: "OUT_OF_STOCK", 
+        requested: type, 
+        found: vouchers.rowCount 
+      });
     }
 
-    // 3. Mark as sold and link to phone
+    // 3. Process Transaction
     const voucherIds = vouchers.rows.map(v => v.id);
     await db.query(
       'UPDATE vouchers SET status = $1, sold_to = $2, sold_at = NOW() WHERE id = ANY($3)',
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ vouchers: vouchers.rows });
 
   } catch (error) {
-    console.error("VERIFY ERROR:", error.response?.data || error.message);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error("API Error:", error);
+    return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
   }
 }
