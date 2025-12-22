@@ -67,7 +67,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
-      <Head><title>NEONCHECK | Premium WAEC Portal</title></Head>
+      <Head><title>WAEC GH CHECKERS | Premium WAEC Portal</title></Head>
       <Toaster position="top-center" />
 
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
@@ -76,7 +76,7 @@ export default function Home() {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
               <Zap size={20} className="text-white fill-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-800">NEON<span className="text-blue-600">CHECK</span></span>
+            <span className="text-xl font-bold tracking-tight text-slate-800">WAEC GH<span className="text-blue-600"> CHECKERS</span></span>
           </div>
           <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-wider">History</button>
         </div>
