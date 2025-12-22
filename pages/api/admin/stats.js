@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-
+import db from '../../../lib/db';
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
@@ -10,7 +10,6 @@ export default async function handler(req, res) {
 
   // ... rest of your API logic
 
-import db from '../../../lib/db';
 
 export default async function handler(req, res) {
   try {
