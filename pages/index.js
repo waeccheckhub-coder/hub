@@ -6,10 +6,10 @@ import { useRouter } from 'next/router';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { 
-  ShoppingCart, Zap, X, CheckCircle2, 
-  History, ArrowRight, ShieldCheck, 
-  Sparkles, ZapOff, MessageSquare, 
-  MousePointer2, CreditCard, Send
+  ShoppingCart, Zap, X, History, 
+  ArrowRight, ShieldCheck, Sparkles, 
+  ZapOff, MessageSquare, Smartphone, 
+  CheckCircle, CreditCard, Send
 } from 'lucide-react';
 
 export default function Home() {
@@ -37,9 +37,9 @@ export default function Home() {
   };
 
   const vouchers = [
-    { id: 'WASSCE', name: 'WASSCE', full: 'WASSCE Results Checker', color: 'text-blue-600', border: 'border-blue-100', bg: 'bg-blue-50', price: 30 },
-    { id: 'BECE', name: 'BECE', full: 'BECE Results Checker', color: 'text-indigo-600', border: 'border-indigo-100', bg: 'bg-indigo-50', price: 30 },
-    { id: 'PLACEMENT', name: 'CSSPS', full: 'School Placement Voucher', color: 'text-violet-600', border: 'border-violet-100', bg: 'bg-violet-50', price: 30 },
+    { id: 'WASSCE', name: 'WASSCE', full: 'WASSCE Results Checker', price: 30 },
+    { id: 'BECE', name: 'BECE', full: 'BECE Results Checker', price: 30 },
+    { id: 'PLACEMENT', name: 'CSSPS', full: 'School Placement Voucher', price: 30 },
   ];
 
   const faqs = [
@@ -64,121 +64,94 @@ export default function Home() {
       router.push(`/thank-you?ref=${ref.reference}`);
       toast.dismiss(t);
     } catch (e) {
-      toast.error('Verification failed. Please contact support with your reference.');
+      toast.error('Verification failed. Please contact support.');
       toast.dismiss(t);
     }
   };
 
   const paystackProps = {
-    email: phone ? `${phone}@waecghcheckers.com` : 'customer@waecghcheckers.com',
+    email: phone ? `${phone}@waeccheckers.com` : 'customer@waeccheckers.com',
     amount: Math.round((selectedVoucher?.price || 0) * quantity * 100),
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
-    text: "Confirm & Pay",
+    text: "Pay Now",
     onSuccess: (ref) => handleSuccess(ref),
     onClose: () => toast("Transaction paused", { icon: '⚠️' }),
     currency: "GHS",
-    reference: `WGC-${Math.floor(Math.random() * 1000000000)}`
+    reference: `W-CH-${Math.floor(Math.random() * 1000000000)}`
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFF] text-slate-900 font-sans selection:bg-blue-100">
-      <Head><title>Waec GH Checkers | Instant Results Vouchers</title></Head>
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
+      <Head><title>WAEC Checkers | Buy Result Vouchers Online</title></Head>
       <Toaster position="top-center" />
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-              <Zap size={20} className="text-white fill-white" />
+      {/* Simplified Navigation */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+              <Zap size={18} className="text-white fill-white" />
             </div>
-            <span className="text-xl font-black tracking-tighter text-slate-800 uppercase">Waec GH <span className="text-blue-600">Checkers</span></span>
+            <span className="text-lg font-bold tracking-tight text-slate-900 uppercase">WAEC<span className="text-blue-600">Checkers</span></span>
           </div>
-          <div className="flex items-center gap-6">
-            <button onClick={() => document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})} className="hidden lg:block text-[11px] font-black text-slate-400 hover:text-blue-600 transition-all uppercase tracking-widest">Process</button>
-            <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="hidden lg:block text-[11px] font-black text-slate-400 hover:text-blue-600 transition-all uppercase tracking-widest">History</button>
-            <div className="px-4 py-2 bg-emerald-50 rounded-full flex items-center gap-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">System Live</span>
+          <div className="flex items-center gap-4">
+            <button onClick={() => document.getElementById('history').scrollIntoView({behavior:'smooth'})} className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase">Check History</button>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-100">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-bold text-green-700 uppercase">Online</span>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 pt-12">
-        {/* Hero */}
-        <div className="text-center max-w-4xl mx-auto mb-20">
-          <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-[11px] font-black uppercase tracking-[0.2em] mb-8">
-            <Sparkles size={14} /> Official WAEC Voucher Portal
-          </motion.div>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tight text-slate-900 mb-8 leading-[0.9]">
-            Check your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Results</span> instantly.
+      <main className="max-w-6xl mx-auto px-4 pt-10 pb-20">
+        {/* Simple Hero */}
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
+            Get your checker <span className="text-blue-600 text-shadow-sm">instantly.</span>
           </h1>
-          <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
-            Waec GH Checkers provides the most reliable way to get your WASSCE, BECE, and Placement vouchers in seconds.
+          <p className="text-lg text-slate-500 max-w-xl font-medium">
+            The fastest way to purchase WAEC, BECE, and Placement vouchers in Ghana.
           </p>
         </div>
 
-        {/* Voucher Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-32">
+        {/* Improved Voucher Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-20">
           {vouchers.map((v) => {
             const isOutOfStock = stock[v.id] <= 0;
+            const isSelected = selectedVoucher?.id === v.id;
             return (
-              <motion.div
+              <div
                 key={v.id}
-                whileHover={!isOutOfStock ? { y: -10 } : {}}
                 onClick={() => !isOutOfStock && setSelectedVoucher(v)}
-                className={`group p-10 rounded-[3rem] bg-white border ${isOutOfStock ? 'opacity-70 grayscale' : 'hover:shadow-3xl hover:shadow-blue-100/50'} border-slate-100 transition-all cursor-pointer relative overflow-hidden`}
+                className={`group relative p-8 bg-white border-2 transition-all cursor-pointer rounded-xl ${
+                    isSelected ? 'border-blue-600 shadow-lg' : 'border-transparent hover:border-slate-200 shadow-sm'
+                } ${isOutOfStock ? 'opacity-60 grayscale' : ''}`}
               >
                 {isOutOfStock && (
-                  <div className="absolute top-6 right-6 px-4 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><ZapOff size={12} /> Out of Stock</div>
+                  <div className="absolute top-4 right-4 text-[10px] font-bold text-red-500 uppercase">Sold Out</div>
                 )}
-                <div className={`w-14 h-14 ${v.bg} ${v.color} rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform`}>
-                  <ShoppingCart size={28} />
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-slate-900">{v.name}</h3>
+                  <p className="text-sm text-slate-400 font-medium">{v.full}</p>
                 </div>
-                <h3 className="text-3xl font-bold text-slate-800 mb-2">{v.name}</h3>
-                <p className="text-slate-400 font-medium mb-12">{v.full}</p>
-                <div className="flex items-end justify-between">
-                  <span className="text-4xl font-black text-slate-900">₵{v.price}</span>
-                  <div className={`p-4 rounded-2xl ${isOutOfStock ? 'bg-slate-100' : 'bg-blue-600 text-white shadow-xl shadow-blue-200'} transition-all`}>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-3xl font-black text-blue-600">GHS {v.price}</span>
+                  <div className={`w-10 h-10 rounded flex items-center justify-center ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
                     <ArrowRight size={20} />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
-        {/* How It Works */}
-        <section id="how-it-works" className="mb-40">
-          <div className="text-center mb-16">
-            <h2 className="text-xs font-black uppercase tracking-[0.4em] text-blue-600 mb-4">The Process</h2>
-            <p className="text-4xl font-black">How it works</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12">
-            {[
-              { icon: <MousePointer2 />, title: "Select Voucher", desc: "Choose the specific result checker or placement voucher you need." },
-              { icon: <CreditCard />, title: "Quick Payment", desc: "Pay securely with Mobile Money or Bank Card via Paystack." },
-              { icon: <Send />, title: "Instant Delivery", desc: "Receive your codes instantly on your screen and via SMS." }
-            ].map((step, i) => (
-              <div key={i} className="text-center p-8">
-                <div className="w-16 h-16 bg-white shadow-xl shadow-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-8 text-blue-600 border border-slate-50">
-                  {step.icon}
-                </div>
-                <h4 className="text-xl font-bold mb-4">{step.title}</h4>
-                <p className="text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* History Section */}
-        <section id="history" className="bg-slate-900 rounded-[4rem] p-12 md:p-24 text-white relative overflow-hidden mb-32">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full" />
-          <div className="relative z-10 grid md:grid-cols-2 gap-20 items-center">
-            <div>
-              <h2 className="text-4xl md:text-6xl font-black mb-6">Lost your code?</h2>
-              <p className="text-slate-400 text-lg mb-10">We keep a history of your purchases. Enter your phone number to retrieve them instantly.</p>
+        {/* History Section - Simple Card */}
+        <section id="history" className="bg-white border border-slate-200 rounded-2xl overflow-hidden mb-20 shadow-sm">
+          <div className="grid md:grid-cols-2">
+            <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-slate-100">
+              <h2 className="text-2xl font-bold mb-2">Retrieve Voucher</h2>
+              <p className="text-slate-500 text-sm mb-8">Can't find your code? Enter your phone number below to see your purchase history.</p>
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 setLoading(true);
@@ -187,90 +160,101 @@ export default function Home() {
                   setRetrievedData(res.data);
                 } catch (e) { toast.error("No records found"); }
                 setLoading(false);
-              }} className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 backdrop-blur-md rounded-[2rem] border border-white/10">
-                <input type="tel" placeholder="Phone used for purchase" value={retrievePhone} onChange={(e) => setRetrievePhone(e.target.value)} className="flex-1 bg-transparent px-8 py-5 outline-none font-bold text-lg" />
-                <button className="bg-blue-600 text-white font-black px-10 py-5 rounded-[1.5rem] hover:bg-white hover:text-blue-600 transition-all text-xs uppercase tracking-widest">{loading ? 'Searching...' : 'Retrieve'}</button>
+              }} className="space-y-3">
+                <input 
+                  type="tel" 
+                  placeholder="024XXXXXXX" 
+                  value={retrievePhone} 
+                  onChange={(e) => setRetrievePhone(e.target.value)} 
+                  className="w-full bg-slate-50 border border-slate-200 px-5 py-3 rounded-lg outline-none focus:border-blue-600 transition-colors font-bold" 
+                />
+                <button className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors text-sm uppercase tracking-wider uppercase">
+                  {loading ? 'Searching...' : 'Check History'}
+                </button>
               </form>
             </div>
-            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
-              {retrievedData?.map((item, i) => (
-                <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-3xl flex justify-between items-center group">
-                  <div>
-                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{item.type}</p>
-                    <p className="text-xs text-slate-400">{item.serial}</p>
-                  </div>
-                  <p className="text-2xl font-black tracking-tighter">{item.pin}</p>
+            <div className="p-8 bg-slate-50 max-h-[400px] overflow-y-auto">
+              {!retrievedData ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50 italic text-sm">
+                   Your results will appear here...
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {retrievedData.map((item, i) => (
+                    <div key={i} className="p-4 bg-white border border-slate-200 rounded-lg flex justify-between items-center">
+                      <div>
+                        <p className="text-[10px] font-bold text-blue-600 uppercase">{item.type}</p>
+                        <p className="text-xs font-mono text-slate-400">{item.serial}</p>
+                      </div>
+                      <p className="text-xl font-black">{item.pin}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="max-w-3xl mx-auto mb-40">
-          <div className="text-center mb-16">
-             <MessageSquare className="mx-auto text-blue-600 mb-6" size={32} />
-             <h2 className="text-4xl font-black">Common Questions</h2>
-          </div>
-          <div className="space-y-4">
+        {/* Simplified FAQ */}
+        <section className="max-w-2xl mx-auto">
+          <h2 className="text-center text-xl font-bold mb-8">Frequently Asked Questions</h2>
+          <div className="space-y-2">
             {faqs.map((f, i) => (
-              <div key={i} className="bg-white border border-slate-100 rounded-[2rem] overflow-hidden">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full px-10 py-8 text-left flex justify-between items-center font-bold text-lg text-slate-800">
+              <div key={i} className="border border-slate-200 bg-white rounded-lg">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full px-6 py-4 text-left flex justify-between items-center font-bold text-slate-700 text-sm">
                   {f.q}
-                  <div className={`transition-transform ${openFaq === i ? 'rotate-45' : ''}`}><X size={20} className="text-slate-300" /></div>
+                  <X size={16} className={`text-slate-300 transition-transform ${openFaq === i ? 'rotate-45' : ''}`} />
                 </button>
-                <AnimatePresence>
-                  {openFaq === i && (
-                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-10 pb-8 text-slate-500 font-medium">
-                      {f.a}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {openFaq === i && <div className="px-6 pb-4 text-sm text-slate-500 leading-relaxed border-t border-slate-50 pt-4">{f.a}</div>}
               </div>
             ))}
           </div>
         </section>
       </main>
 
-      {/* Checkout Drawer */}
+      {/* Modern Checkout Bottom Bar */}
       <AnimatePresence>
         {selectedVoucher && (
-          <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="fixed bottom-0 inset-x-0 z-[60] p-6">
-            <div className="max-w-5xl mx-auto bg-white border border-slate-200 p-8 rounded-[3.5rem] shadow-2xl">
-              <div className="flex flex-col lg:flex-row items-center gap-10">
-                <div className="flex-1 flex items-center gap-6">
-                  <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center shrink-0"><ShoppingCart size={28}/></div>
-                  <div>
-                    <h4 className="font-black text-2xl mb-1">{selectedVoucher?.name}</h4>
-                    <p className="text-blue-600 font-bold uppercase text-[10px] tracking-widest">Total: GHS {((selectedVoucher?.price || 0) * quantity).toFixed(2)}</p>
-                  </div>
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-0 inset-x-0 z-[60] bg-white border-t border-slate-200 p-4 shadow-2xl">
+            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex-1 flex items-center gap-4">
+                <div className="w-10 h-10 bg-slate-100 rounded flex items-center justify-center text-slate-900 shrink-0"><ShoppingCart size={20}/></div>
+                <div>
+                  <h4 className="font-bold text-sm">{selectedVoucher?.name} x {quantity}</h4>
+                  <p className="text-blue-600 font-black text-xs">GHS {((selectedVoucher?.price || 0) * quantity).toFixed(2)}</p>
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <div className="flex items-center bg-slate-50 rounded-2xl p-2 border border-slate-100">
-                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 font-black">-</button>
-                    <span className="w-10 text-center font-black">{quantity}</span>
-                    <button onClick={() => setQuantity(Math.min(10, quantity + 1))} className="w-10 h-10 font-black">+</button>
-                  </div>
-                  <input type="tel" placeholder="Active Phone Number" value={phone} onChange={(e)=>setPhone(e.target.value)} className="bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 w-52 font-bold outline-none focus:ring-4 ring-blue-500/10 transition-all" />
-                  {hasMounted && phone.length >= 10 ? (
-                    <PaystackButton {...paystackProps} className="bg-blue-600 text-white font-black px-10 py-5 rounded-2xl hover:bg-slate-900 transition-all text-xs uppercase tracking-widest shadow-xl shadow-blue-200" />
-                  ) : (
-                    <button disabled className="bg-slate-100 text-slate-400 font-black px-10 py-5 rounded-2xl text-xs uppercase tracking-widest">Phone Required</button>
-                  )}
-                  <button onClick={() => setSelectedVoucher(null)} className="w-12 h-12 flex items-center justify-center text-slate-300 hover:text-red-500 bg-slate-50 rounded-full"><X size={20} /></button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-slate-100 rounded p-1">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 font-bold">-</button>
+                  <span className="w-8 text-center font-bold text-sm">{quantity}</span>
+                  <button onClick={() => setQuantity(Math.min(10, quantity + 1))} className="w-8 h-8 font-bold">+</button>
                 </div>
+                <input 
+                  type="tel" 
+                  placeholder="Phone Number" 
+                  value={phone} 
+                  onChange={(e)=>setPhone(e.target.value)} 
+                  className="bg-slate-100 border-none rounded px-4 py-2 w-40 text-sm font-bold outline-none focus:ring-2 ring-blue-600" 
+                />
+                <PaystackButton 
+                  {...paystackProps} 
+                  className={`px-6 py-2 rounded text-sm font-bold transition-all ${phone.length >= 10 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  disabled={phone.length < 10}
+                />
+                <button onClick={() => setSelectedVoucher(null)} className="p-2 text-slate-300 hover:text-red-500"><X size={20} /></button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <footer className="py-20 text-center bg-slate-50 mt-20">
-         <div className="flex items-center justify-center gap-3 mb-6">
-            <ShieldCheck size={18} className="text-blue-600" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Securely processed via Paystack</span>
+      <footer className="py-12 text-center border-t border-slate-100 bg-white">
+         <div className="flex items-center justify-center gap-2 mb-4 opacity-50">
+            <ShieldCheck size={14} className="text-blue-600" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-900">Secure Payments via Paystack</span>
          </div>
-         <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em]">Waec GH Checkers Infrastructure &copy; 2025</p>
+         <p className="text-[10px] font-medium text-slate-400">© 2025 WAEC Checkers. All rights reserved.</p>
       </footer>
     </div>
   );
