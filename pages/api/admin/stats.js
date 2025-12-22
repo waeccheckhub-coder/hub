@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   }
 
   // ... rest of your API logic
-}import db from '../../../lib/db';
+}
+import db from '../../../lib/db';
 
 export default async function handler(req, res) {
   try {
