@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PaystackButton } from 'react-paystack';
 import { useRouter } from 'next/router';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { ShoppingCart, Search, History, Check, X, Zap, Download } from 'lucide-react';
+import { ShoppingCart, Search, Zap, X, Check } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function Home() {
   ];
 
   const handlePaystackSuccess = async (reference) => {
-    const loadingToast = toast.loading('Syncing with WAEC Database...');
+    const loadingToast = toast.loading('Syncing with WAEC...');
     try {
       const res = await axios.post('/api/verify-payment', {
         reference: reference.reference,
@@ -45,7 +45,7 @@ export default function Home() {
 
   const handleRetrieve = async (e) => {
     e.preventDefault();
-    if (!retrievePhone) return toast.error("Enter your phone number");
+    if (!retrievePhone) return toast.error("Enter phone number");
     setLoading(true);
     try {
       const res = await axios.post('/api/retrieve', { phone: retrievePhone });
@@ -58,178 +58,120 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden">
-      <Head><title>NEONCHECK | Premium WAEC Services</title></Head>
+    <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden pb-20">
+      <Head><title>NEONCHECK | WAEC PORTAL</title></Head>
       <Toaster position="top-right" />
 
-      {/* Animated Background Orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-600/20 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fuchsia-600/20 blur-[120px] rounded-full" />
-      </div>
+      {/* Hero BG */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-cyan-900/20 to-transparent pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-10">
-        {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6">
-          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-2">
-            <Zap className="text-cyan-400 fill-cyan-400" size={32} />
-            <span className="text-3xl font-black italic tracking-tighter bg-gradient-to-r from-cyan-400 via-white to-fuchsia-500 bg-clip-text text-transparent">
-              NEONCHECK
-            </span>
-          </motion.div>
-          
-          <div className="flex bg-white/5 backdrop-blur-xl rounded-2xl p-1.5 border border-white/10 shadow-2xl">
-            <button className="px-8 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg">Buy Vouchers</button>
-            <a href="#retrieve" className="px-8 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white transition">Retrieve History</a>
+        <header className="flex justify-between items-center mb-16">
+          <div className="flex items-center gap-2">
+            <Zap className="text-cyan-400 fill-cyan-400" size={28} />
+            <span className="text-2xl font-black tracking-tighter italic">NEONCHECK</span>
           </div>
+          <a href="#retrieve" className="text-sm font-bold text-gray-400 hover:text-cyan-400 transition">RETRIEVE HISTORY</a>
         </header>
 
-        {/* Hero Section */}
-        <div className="text-center mb-20">
-          <motion.h1 
-            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-            className="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-[0.9]"
-          >
-            GET RESULTS <br/> <span className="text-cyan-400">INSTANTLY.</span>
+        <div className="text-center mb-16">
+          <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-6xl md:text-8xl font-black tracking-tighter mb-4">
+            FASTER <span className="text-cyan-400 font-outline-2">RESULTS.</span>
           </motion.h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg md:text-xl">
-            The fastest way to get your WASSCE, BECE & Placement checkers. 
-            Pay with MoMo and receive your PIN via SMS immediately.
-          </p>
+          <p className="text-gray-500 font-mono tracking-widest uppercase text-sm">Official WAEC Result Checkers & Placement Vouchers</p>
         </div>
 
-        {/* 3 Voucher Sections */}
-        <div className="grid md:grid-cols-3 gap-8 mb-32">
-          {vouchers.map((v, i) => (
+        {/* Purchase Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-24">
+          {vouchers.map((v) => (
             <motion.div
               key={v.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -10 }}
+              whileHover={{ scale: 1.02, y: -5 }}
               onClick={() => setSelectedVoucher(v)}
-              className={`relative group cursor-pointer p-8 rounded-[2.5rem] bg-white/5 border-2 ${v.border} ${v.shadow} shadow-2xl transition-all overflow-hidden`}
+              className={`p-8 rounded-[2rem] bg-white/5 border-2 ${v.border} ${v.shadow} shadow-2xl cursor-pointer transition-all relative overflow-hidden`}
             >
-              <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${v.color}`} />
-              <div className="flex justify-between items-start mb-8">
-                <div className={`p-4 rounded-2xl bg-gradient-to-br ${v.color} shadow-lg`}>
-                  <ShoppingCart className="text-black" />
-                </div>
-                <span className="text-4xl font-black opacity-20 group-hover:opacity-100 transition tracking-tighter italic">0{i+1}</span>
-              </div>
-              <h3 className="text-2xl font-black mb-2 tracking-tight">{v.name}</h3>
-              <p className="text-gray-400 text-sm mb-6 uppercase tracking-widest font-bold">Official WAEC Stock</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-sm font-bold text-gray-500">GHS</span>
-                <span className="text-4xl font-black text-white tracking-tighter">{v.price}.00</span>
+              <div className="absolute -right-4 -top-4 opacity-10"><ShoppingCart size={120}/></div>
+              <h3 className="text-2xl font-black mb-1">{v.name}</h3>
+              <p className="text-xs text-gray-400 mb-6 uppercase tracking-widest font-bold">In Stock - GHS {v.price}.00</p>
+              <div className="flex items-center gap-2 text-neonGreen text-xs font-bold">
+                <Check size={14}/> SMS DELIVERY
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Integrated Retrieve Section */}
-        <section id="retrieve" className="py-20 border-t border-white/10">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-4xl font-black mb-4 bg-gradient-to-r from-fuchsia-400 to-purple-600 bg-clip-text text-transparent">RETRIEVE PAST ORDERS</h2>
-              <p className="text-gray-500 italic font-mono">Lost your code? No problem. Enter your number below.</p>
-            </div>
-            
-            <form onSubmit={handleRetrieve} className="relative flex items-center mb-12">
-              <input 
-                type="tel" 
-                placeholder="024 XXX XXXX"
-                value={retrievePhone}
-                onChange={(e) => setRetrievePhone(e.target.value)}
-                className="w-full bg-white/5 border-2 border-fuchsia-500/30 rounded-3xl px-8 py-6 text-xl focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-all placeholder:text-gray-700"
-              />
-              <button className="absolute right-4 p-4 rounded-2xl bg-fuchsia-500 text-black hover:bg-white transition shadow-xl">
-                {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div> : <Search size={24} />}
-              </button>
-            </form>
+        {/* Retrieve Section */}
+        <section id="retrieve" className="max-w-2xl mx-auto pt-10 border-t border-white/10">
+          <h2 className="text-2xl font-black mb-6 text-center italic">RETRIEVE PAST ORDERS</h2>
+          <form onSubmit={handleRetrieve} className="flex gap-2 mb-8">
+            <input 
+              type="tel" placeholder="Phone Number" value={retrievePhone}
+              onChange={(e) => setRetrievePhone(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:border-cyan-400 outline-none transition"
+            />
+            <button className="bg-white text-black font-black px-6 rounded-xl hover:bg-cyan-400 transition">
+              {loading ? '...' : <Search size={20}/>}
+            </button>
+          </form>
 
-           <AnimatePresence>
-  {retrievedData && (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="space-y-4"
-    >
-      {retrievedData.map((item, idx) => (
-        <div
-          key={idx}
-          className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4"
-        >
-          <div className="text-center md:text-left">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
-              {new Date(item.created_at).toDateString()}
-            </span>
-            <h4 className="text-xl font-black">{item.type}</h4>
-          </div>
-          <div className="flex flex-col items-center md:items-end">
-            <span className="text-xs text-gray-500 font-mono">
-              SERIAL: {item.serial}
-            </span>
-            <span className="text-2xl font-black font-mono tracking-tighter text-fuchsia-400">
-              {item.pin}
-            </span>
-          </div>
-        </div>
-      ))}
-    </motion.div>   {/* ✅ THIS WAS MISSING */}
-  )}
-</AnimatePresence>
-
+          <div className="space-y-3">
+            <AnimatePresence>
+              {retrievedData?.map((item, idx) => (
+                <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between">
+                  <div>
+                    <p className="text-[10px] text-gray-500">{new Date(item.created_at).toLocaleDateString()}</p>
+                    <p className="font-bold text-cyan-400">{item.type}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">SERIAL: {item.serial}</p>
+                    <p className="font-mono font-bold text-lg">{item.pin}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </section>
       </div>
 
-      {/* Floating Checkout Drawer */}
+      {/* Floating Checkout */}
       <AnimatePresence>
         {selectedVoucher && (
-          <motion.div 
-            initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50"
-          >
-            <div className="bg-white/10 backdrop-blur-2xl border-2 border-white/20 rounded-[3rem] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="flex items-center gap-6">
-                  <div className={`p-5 rounded-3xl bg-gradient-to-br ${selectedVoucher.color} text-black`}>
-                    <ShoppingCart size={32} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black leading-none mb-1">{selectedVoucher.name}</h3>
-                    <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">GHS {(selectedVoucher.price * quantity).toFixed(2)} Total</p>
-                  </div>
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-4 inset-x-4 z-50">
+            <div className="max-w-4xl mx-auto bg-white text-black p-6 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-black text-white p-3 rounded-2xl"><ShoppingCart/></div>
+                <div>
+                  <h4 className="font-black leading-none">{selectedVoucher.name}</h4>
+                  <p className="text-xs font-bold text-gray-500">GHS {(selectedVoucher.price * quantity).toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <div className="flex items-center bg-gray-100 rounded-xl p-1">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 font-bold">-</button>
+                  <span className="w-10 text-center font-black">{quantity}</span>
+                  <button onClick={() => setQuantity(Math.min(50, quantity + 1))} className="w-8 h-8 font-bold">+</button>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <div className="flex items-center bg-black/50 rounded-2xl p-1 border border-white/10">
-                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 hover:text-cyan-400 transition">-</button>
-                    <span className="w-12 text-center font-black text-xl">{quantity}</span>
-                    <button onClick={() => setQuantity(Math.min(50, quantity + 1))} className="w-10 h-10 hover:text-cyan-400 transition">+</button>
-                  </div>
+                <input 
+                  type="tel" placeholder="Your Phone" value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="bg-gray-100 rounded-xl px-4 py-3 w-40 font-bold focus:outline-none focus:ring-2 ring-cyan-400"
+                />
 
-                  <input 
-                    type="tel" placeholder="Your Phone Number" value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="bg-black/50 border border-white/10 rounded-2xl px-6 py-4 w-56 focus:outline-none focus:border-cyan-400 transition font-bold"
+                {phone.length >= 10 ? (
+                  <PaystackButton 
+                    className="bg-black text-white font-black px-10 py-3 rounded-xl hover:bg-cyan-500 transition shadow-lg"
+                    email={generatedEmail} // FAKE EMAIL GENERATED
+                    amount={selectedVoucher.price * quantity * 100}
+                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
+                    text="PAY NOW"
+                    onSuccess={handlePaystackSuccess}
                   />
-
-                  {phone.length >= 10 ? (
-                    <PaystackButton 
-                      className="bg-gradient-to-r from-cyan-400 to-blue-600 text-black font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-cyan-500/20"
-                      email={generatedEmail} // FAKE EMAIL GENERATED AUTOMATICALLY
-                      amount={selectedVoucher.price * quantity * 100}
-                      publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY}
-                      text="CONFIRM & PAY"
-                      onSuccess={handlePaystackSuccess}
-                    />
-                  ) : (
-                    <button disabled className="bg-white/5 text-gray-600 font-black px-12 py-5 rounded-2xl cursor-not-allowed">ENTER PHONE</button>
-                  )}
-                  <button onClick={() => setSelectedVoucher(null)} className="p-4 text-gray-500 hover:text-white transition"><X /></button>
-                </div>
+                ) : (
+                  <button disabled className="bg-gray-200 text-gray-400 font-black px-10 py-3 rounded-xl">ENTER PHONE</button>
+                )}
+                <button onClick={() => setSelectedVoucher(null)} className="text-gray-400 hover:text-black"><X/></button>
               </div>
             </div>
           </motion.div>
