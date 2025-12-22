@@ -1,37 +1,36 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import db from '../../../lib/db';
+
 export default async function handler(req, res) {
+  // 1. Security Check: Verify Admin Session
   const session = await getServerSession(req, res, authOptions);
 
   if (!session) {
     return res.status(401).json({ error: "Access Denied" });
   }
 
-  // ... rest of your API logic
-
-export default async function handler(req, res) {
-  // Only allow POST requests for security
+  // 2. Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { csvData, type } = req.body;
 
-  // Basic Validation
+  // 3. Basic Validation
   if (!csvData || !type) {
     return res.status(400).json({ error: 'Missing required data: csvData or type' });
   }
 
   try {
-    // 1. Split the data by new lines (handles both single manual entry and bulk CSV)
+    // Split the data by new lines (handles both single manual entry and bulk CSV)
     const lines = csvData.trim().split(/\r?\n/);
     const results = {
       success: 0,
       failed: 0,
     };
 
-    // 2. Start a loop to process each line
+    // 4. Process each line and insert into DB
     for (const line of lines) {
       // Clean up whitespace and split by comma
       const parts = line.split(',').map(item => item.trim());
@@ -41,8 +40,7 @@ export default async function handler(req, res) {
         const [serial, pin] = parts;
 
         try {
-          // 3. Insert into the database
-          // Using 'ON CONFLICT' to prevent duplicate serial numbers if you have a unique constraint
+          // Using 'ON CONFLICT' to prevent duplicate serial numbers
           await db.query(
             `INSERT INTO vouchers (type, serial, pin, status, created_at) 
              VALUES ($1, $2, $3, $4, NOW()) 
@@ -59,7 +57,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4. Return summary to the dashboard
+    // 5. Return summary to the dashboard
     return res.status(200).json({
       message: 'Processing complete',
       summary: results
@@ -69,5 +67,4 @@ export default async function handler(req, res) {
     console.error('Upload API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error during upload' });
   }
-}
 }
