@@ -287,14 +287,14 @@ export default function Home() {
         {/* Retrieve Section */}
         <section id="retrieve" className="glass-card p-8 mb-8">
           <h3 className="text-xl font-bold mb-1">Retrieve Purchased Vouchers</h3>
-          <p className="text-sm text-[#64748b] mb-6">Enter the phone number or email you used to buy vouchers.</p>
+          <p className="text-sm text-[#64748b] mb-6">Enter the phone number you used to buy vouchers.</p>
           
           <div className="flex flex-col md:flex-row gap-3">
             <input 
               value={retrieveInput}
               onChange={e => setRetrieveInput(e.target.value)}
               className="input-field flex-1" 
-              placeholder="0244123456 or example@domain.com" 
+              placeholder="0244123456" 
             />
             <button 
               onClick={retrieveVouchers}
