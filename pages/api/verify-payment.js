@@ -12,9 +12,14 @@ export default async function handler(req, res) {
       { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
     );
 
-    if (paystackRes.data.data.status !== 'success') {
+    const paystackData = paystackRes.data.data;
+
+    if (paystackData.status !== 'success') {
       return res.status(400).json({ error: "Verification failed" });
     }
+
+    // Capture the verified amount (Paystack returns subunits/kobo, so divide by 100)
+    const verifiedAmount = paystackData.amount / 100;
 
     // 2. Fetch Available Vouchers
     const vouchers = await db.query(
@@ -26,12 +31,30 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "OUT_OF_STOCK" });
     }
 
-    // 3. Mark as Sold
+    // 3. Mark Vouchers as Sold
     const voucherIds = vouchers.rows.map(v => v.id);
     await db.query(
       'UPDATE vouchers SET status = $1, sold_to = $2, sold_at = NOW() WHERE id = ANY($3)',
       ['sold', phone, voucherIds]
     );
+
+    // ---------------------------------------------------------
+    // 3.5 (THE FIX) INSERT INTO TRANSACTIONS TABLE
+    // ---------------------------------------------------------
+    try {
+      await db.query(
+        `INSERT INTO transactions 
+        (reference, phone, amount, quantity, voucher_type, status, created_at) 
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+        [reference, phone, verifiedAmount, quantity, type, 'success']
+      );
+    } catch (dbError) {
+      // Critical Log: If this fails, you have sold vouchers but no transaction record.
+      console.error("CRITICAL: Failed to save transaction record:", dbError);
+      // We do NOT return error here, because the user has already paid and vouchers are assigned. 
+      // We proceed to give them their vouchers.
+    }
+    // ---------------------------------------------------------
 
     // 4. PORTAL LINK MAPPING
     const getPortalLink = (vType) => {
@@ -45,7 +68,6 @@ export default async function handler(req, res) {
     const portalLink = getPortalLink(type);
 
     // 5. ARKESEL SMS INTEGRATION
-    // Formatted for better readability on mobile screens
     const voucherDetails = vouchers.rows.map(v => `S/N: ${v.serial} PIN: ${v.pin}`).join('\n');
     
     const smsMessage = `CheckerCard: Your ${type} purchase was successful.\n\n${voucherDetails}\n\nCheck Result here: ${portalLink}\n\nThank you for choosing waec gh checkers.`;
